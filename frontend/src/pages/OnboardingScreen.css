@@ -1,0 +1,160 @@
+.onboarding-screen {
+  min-height: 100vh;
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 28px 20px 24px;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+/* Logo */
+
+.onboarding-logo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #1725c8;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.logo-icon {
+  width: 24px;
+  height: 24px;
+  border: 3px solid #1725c8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* Illustration */
+
+.onboarding-image-container {
+  width: min(100%, 360px);
+  height: 310px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 5px;
+}
+
+.onboarding-image {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* Text */
+
+.onboarding-text {
+  width: 100%;
+  max-width: 390px;
+  text-align: center;
+  margin-top: 8px;
+}
+
+.onboarding-text h1 {
+  margin: 0;
+  color: #111111;
+  font-size: clamp(1.55rem, 5vw, 2rem);
+  font-weight: 700;
+}
+
+.onboarding-text p {
+  margin: 10px auto 0;
+  max-width: 290px;
+  color: #555555;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* Dots */
+
+.onboarding-dots {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  margin-top: 20px;
+}
+
+.onboarding-dot {
+  width: 7px;
+  height: 7px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: #d8d8e8;
+  cursor: pointer;
+}
+
+.onboarding-dot.active {
+  width: 22px;
+  border-radius: 10px;
+  background: #3d2df5;
+}
+
+/* Button */
+
+.get-started-button {
+  width: min(100%, 360px);
+  height: 52px;
+  margin-top: 22px;
+  border: none;
+  border-radius: 11px;
+  background: linear-gradient(90deg, #4930f5, #3524ed);
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.get-started-button:hover {
+  opacity: 0.92;
+}
+
+.get-started-button:active {
+  transform: scale(0.98);
+}
+
+/* Tablet */
+
+@media (min-width: 600px) {
+  .onboarding-screen {
+    padding-top: 35px;
+  }
+
+  .onboarding-image-container {
+    width: 430px;
+    height: 360px;
+  }
+
+  .onboarding-text h1 {
+    font-size: 2.1rem;
+  }
+
+  .onboarding-text p {
+    font-size: 1rem;
+  }
+
+  .get-started-button {
+    width: 390px;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .onboarding-screen {
+    max-width: 500px;
+    margin: 0 auto;
+    min-height: 100vh;
+  }
+}

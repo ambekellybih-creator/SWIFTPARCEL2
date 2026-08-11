@@ -1,17 +1,29 @@
 import React, { useState } from "react";
 import SplashScreen from "./pages/SplashScreen";
+import OnboardingScreen from "./pages/OnboardingScreen";
 
 function App() {
-  const [showSplash, setShowSplash] = useState(true);
+  const [currentScreen, setCurrentScreen] = useState("splash");
 
-  if (showSplash) {
-    return <SplashScreen onFinish={() => setShowSplash(false)} />;
+  if (currentScreen === "splash") {
+    return (
+      <SplashScreen
+        onFinish={() => setCurrentScreen("onboarding")}
+      />
+    );
+  }
+
+  if (currentScreen === "onboarding") {
+    return (
+      <OnboardingScreen
+        onGetStarted={() => setCurrentScreen("login")}
+      />
+    );
   }
 
   return (
     <div>
-      <h1>Welcome to SwiftParcel</h1>
-      <p>The next screen will be built here.</p>
+      <h1>Login Screen Coming Soon</h1>
     </div>
   );
 }
