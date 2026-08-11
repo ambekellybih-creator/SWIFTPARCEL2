@@ -1,0 +1,135 @@
+.splash-screen {
+  min-height: 100vh;
+  width: 100%;
+  background: linear-gradient(135deg, #3026d9, #5148e8);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  color: #ffffff;
+  box-sizing: border-box;
+}
+
+.splash-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Parcel logo */
+
+.logo-container {
+  width: 100px;
+  height: 100px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.parcel-logo {
+  width: 65px;
+  height: 65px;
+  position: relative;
+}
+
+.parcel-body {
+  width: 48px;
+  height: 43px;
+  background-color: #ffffff;
+  position: absolute;
+  bottom: 4px;
+  left: 8px;
+  border-radius: 4px;
+}
+
+.parcel-top {
+  width: 48px;
+  height: 24px;
+  background-color: #eeeeff;
+  position: absolute;
+  top: 4px;
+  left: 8px;
+  transform: skewY(-25deg);
+  border-radius: 4px;
+}
+
+.parcel-tape {
+  position: absolute;
+  width: 9px;
+  height: 52px;
+  background-color: #3026d9;
+  left: 27px;
+  top: 7px;
+  z-index: 2;
+  border-radius: 2px;
+}
+
+.splash-screen h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -1px;
+}
+
+.splash-subtitle {
+  margin-top: 10px;
+  margin-bottom: 0;
+  font-size: clamp(0.95rem, 2vw, 1.15rem);
+  font-weight: 400;
+  opacity: 0.9;
+  letter-spacing: 0.5px;
+}
+
+.splash-tagline {
+  position: absolute;
+  bottom: 35px;
+  left: 20px;
+  right: 20px;
+  text-align: center;
+  margin: 0;
+  font-size: 0.9rem;
+  opacity: 0.85;
+}
+
+/* Tablet */
+
+@media (min-width: 600px) {
+  .logo-container {
+    width: 120px;
+    height: 120px;
+  }
+
+  .splash-screen h1 {
+    font-size: 3rem;
+  }
+
+  .splash-subtitle {
+    font-size: 1.15rem;
+  }
+
+  .splash-tagline {
+    bottom: 45px;
+    font-size: 1rem;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .splash-screen {
+    min-height: 100vh;
+  }
+
+  .splash-screen h1 {
+    font-size: 3.5rem;
+  }
+
+  .splash-subtitle {
+    font-size: 1.2rem;
+  }
+}
