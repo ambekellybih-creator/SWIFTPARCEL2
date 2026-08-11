@@ -14,6 +14,7 @@ import HomeScreen from "./pages/HomeScreen";
 import SendParcel from "./pages/SendParcel";
 import Receiver from "./pages/Receiver";
 import ParcelDetails from "./pages/ParcelDetails";
+import ConfirmShipment from "./pages/ConfirmShipment";
 
 function App() {
   return (
@@ -68,7 +69,13 @@ function App() {
           element={<ParcelDetails />}
         />
 
-        {/* Unknown Page */}
+        {/* Confirm Shipment - Step 4 */}
+        <Route
+          path="/confirm-shipment"
+          element={<ConfirmShipment />}
+        />
+
+        {/* Unknown Routes */}
         <Route
           path="*"
           element={<Navigate to="/" replace />}
