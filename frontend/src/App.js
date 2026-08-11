@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import SplashScreen from "./pages/SplashScreen";
 import OnboardingScreen from "./pages/OnboardingScreen";
 import LoginScreen from "./pages/LoginScreen";
+import SignUpScreen from "./pages/SignUpScreen";
 
 function App() {
   const [currentScreen, setCurrentScreen] = useState("splash");
@@ -30,11 +31,15 @@ function App() {
     );
   }
 
-  return (
-    <div>
-      <h1>Sign Up Screen Coming Soon</h1>
-    </div>
-  );
+  if (currentScreen === "signup") {
+    return (
+      <SignUpScreen
+        onLogin={() => setCurrentScreen("login")}
+      />
+    );
+  }
+
+  return null;
 }
 
 export default App;
