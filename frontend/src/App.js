@@ -13,13 +13,14 @@ import SignUpScreen from "./pages/SignUpScreen";
 import HomeScreen from "./pages/HomeScreen";
 import SendParcel from "./pages/SendParcel";
 import Receiver from "./pages/Receiver";
+import ParcelDetails from "./pages/ParcelDetails";
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* Splash */}
+        {/* Splash Screen */}
         <Route
           path="/"
           element={<SplashScreen />}
@@ -49,42 +50,28 @@ function App() {
           element={<HomeScreen />}
         />
 
-        {/* Send Parcel */}
+        {/* Send Parcel - Step 1 */}
         <Route
           path="/send-parcel"
           element={<SendParcel />}
         />
 
-        {/* Receiver */}
+        {/* Receiver - Step 2 */}
         <Route
           path="/receiver"
           element={<Receiver />}
         />
 
-        {/* Future Parcel Details page */}
+        {/* Parcel Details - Step 3 */}
         <Route
           path="/parcel-details"
-          element={
-            <div
-              style={{
-                padding: "40px",
-                textAlign: "center",
-              }}
-            >
-              <h2>Parcel Details</h2>
-              <p>
-                This page will be built next.
-              </p>
-            </div>
-          }
+          element={<ParcelDetails />}
         />
 
-        {/* Unknown routes */}
+        {/* Unknown Page */}
         <Route
           path="*"
-          element={
-            <Navigate to="/" replace />
-          }
+          element={<Navigate to="/" replace />}
         />
 
       </Routes>
