@@ -1,5 +1,10 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 
 import SplashScreen from "./pages/SplashScreen";
 import OnboardingScreen from "./pages/OnboardingScreen";
@@ -7,6 +12,7 @@ import LoginScreen from "./pages/LoginScreen";
 import SignUpScreen from "./pages/SignUpScreen";
 import HomeScreen from "./pages/HomeScreen";
 import SendParcel from "./pages/SendParcel";
+import Receiver from "./pages/Receiver";
 
 function App() {
   return (
@@ -14,7 +20,10 @@ function App() {
       <Routes>
 
         {/* Splash */}
-        <Route path="/" element={<SplashScreen />} />
+        <Route
+          path="/"
+          element={<SplashScreen />}
+        />
 
         {/* Onboarding */}
         <Route
@@ -22,12 +31,13 @@ function App() {
           element={<OnboardingScreen />}
         />
 
-        {/* Authentication */}
+        {/* Login */}
         <Route
           path="/login"
           element={<LoginScreen />}
         />
 
+        {/* Sign Up */}
         <Route
           path="/signup"
           element={<SignUpScreen />}
@@ -39,15 +49,44 @@ function App() {
           element={<HomeScreen />}
         />
 
-        {/* Unknown URL */}
+        {/* Send Parcel */}
+        <Route
+          path="/send-parcel"
+          element={<SendParcel />}
+        />
+
+        {/* Receiver */}
+        <Route
+          path="/receiver"
+          element={<Receiver />}
+        />
+
+        {/* Future Parcel Details page */}
+        <Route
+          path="/parcel-details"
+          element={
+            <div
+              style={{
+                padding: "40px",
+                textAlign: "center",
+              }}
+            >
+              <h2>Parcel Details</h2>
+              <p>
+                This page will be built next.
+              </p>
+            </div>
+          }
+        />
+
+        {/* Unknown routes */}
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={
+            <Navigate to="/" replace />
+          }
         />
-<Route
-  path="/send-parcel"
-  element={<SendParcel />}
-/>
+
       </Routes>
     </BrowserRouter>
   );
