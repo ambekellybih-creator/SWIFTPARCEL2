@@ -1,0 +1,275 @@
+.login-screen {
+  min-height: 100vh;
+  width: 100%;
+  background: #ffffff;
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+  padding: 30px 20px;
+  color: #111111;
+}
+
+.login-container {
+  width: 100%;
+  max-width: 390px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Logo */
+
+.login-logo {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  color: #1725c8;
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin-bottom: 32px;
+}
+
+.login-logo-icon {
+  width: 27px;
+  height: 27px;
+  border: 2.5px solid #1725c8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* Tabs */
+
+.auth-tabs {
+  width: 100%;
+  display: flex;
+  border-bottom: 1px solid #e2e2e8;
+  margin-bottom: 24px;
+}
+
+.auth-tab {
+  width: 50%;
+  border: none;
+  background: transparent;
+  padding: 12px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #777777;
+  cursor: pointer;
+  position: relative;
+}
+
+.auth-tab.active {
+  color: #151515;
+  font-weight: 600;
+}
+
+.auth-tab.active::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: #4930f5;
+}
+
+/* Form */
+
+.login-form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 18px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #222222;
+}
+
+.form-group input {
+  width: 100%;
+  height: 46px;
+  padding: 0 13px;
+  border: 1px solid #ddddE8;
+  border-radius: 9px;
+  outline: none;
+  font-size: 0.82rem;
+  color: #222222;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.form-group input:focus {
+  border-color: #4930f5;
+  box-shadow: 0 0 0 2px rgba(73, 48, 245, 0.08);
+}
+
+.form-group input::placeholder {
+  color: #aaaaaa;
+}
+
+/* Password */
+
+.password-wrapper {
+  position: relative;
+}
+
+.password-wrapper input {
+  padding-right: 45px;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  color: #777777;
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.forgot-password {
+  display: block;
+  margin: 8px 0 0 auto;
+  border: none;
+  background: transparent;
+  color: #4930f5;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Login button */
+
+.login-button {
+  width: 100%;
+  height: 48px;
+  margin-top: 4px;
+  border: none;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #4c31f5, #3725ed);
+  color: white;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-button:hover {
+  opacity: 0.92;
+}
+
+/* Divider */
+
+.or-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 15px;
+}
+
+.or-divider span {
+  flex: 1;
+  height: 1px;
+  background: #e4e4ea;
+}
+
+.or-divider p {
+  margin: 0;
+  color: #999999;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+/* Social buttons */
+
+.social-buttons {
+  display: flex;
+  gap: 10px;
+}
+
+.social-button {
+  flex: 1;
+  height: 45px;
+  border: 1px solid #ddddE8;
+  border-radius: 9px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.social-button:hover {
+  background: #f8f8fc;
+}
+
+.google-icon {
+  font-weight: 700;
+  color: #4285f4;
+  font-size: 1.1rem;
+}
+
+.apple-icon {
+  font-size: 1rem;
+  color: #111111;
+}
+
+/* Sign up text */
+
+.signup-text {
+  text-align: center;
+  margin-top: 25px;
+  color: #777777;
+  font-size: 0.75rem;
+}
+
+.signup-text button {
+  border: none;
+  background: transparent;
+  color: #4930f5;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+/* Tablet */
+
+@media (min-width: 600px) {
+  .login-screen {
+    padding-top: 50px;
+  }
+
+  .login-container {
+    max-width: 420px;
+  }
+
+  .login-logo {
+    font-size: 1.25rem;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .login-screen {
+    align-items: center;
+    padding: 40px 20px;
+  }
+
+  .login-container {
+    max-width: 430px;
+  }
+}
