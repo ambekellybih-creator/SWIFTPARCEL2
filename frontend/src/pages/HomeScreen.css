@@ -1,0 +1,292 @@
+.home-screen {
+  min-height: 100vh;
+  width: 100%;
+  background: #f7f7fb;
+  box-sizing: border-box;
+  padding: 24px 20px 90px;
+  color: #171717;
+}
+
+/* Header */
+
+.home-header {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.home-greeting {
+  margin: 0 0 5px;
+  color: #777777;
+  font-size: 0.78rem;
+}
+
+.home-header h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.notification-button {
+  width: 42px;
+  height: 42px;
+  border: 1px solid #e4e4eb;
+  border-radius: 50%;
+  background: #ffffff;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+/* Tracking card */
+
+.tracking-card {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 25px;
+  border-radius: 18px;
+  padding: 24px;
+  box-sizing: border-box;
+  background: linear-gradient(135deg, #4930f5, #3024d7);
+  color: #ffffff;
+}
+
+.tracking-card-content p {
+  margin: 0 0 5px;
+  font-size: 0.75rem;
+  opacity: 0.85;
+}
+
+.tracking-card h2 {
+  margin: 0 0 17px;
+  font-size: 1.3rem;
+}
+
+.tracking-input {
+  display: flex;
+  gap: 8px;
+}
+
+.tracking-input input {
+  flex: 1;
+  min-width: 0;
+  height: 45px;
+  border: none;
+  border-radius: 9px;
+  padding: 0 13px;
+  outline: none;
+  font-size: 0.78rem;
+}
+
+.tracking-input button {
+  width: 75px;
+  border: none;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #3929df;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Sections */
+
+.home-section {
+  width: 100%;
+  max-width: 1000px;
+  margin: 0 auto 25px;
+}
+
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 13px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.section-heading button {
+  border: none;
+  background: transparent;
+  color: #4930f5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Quick actions */
+
+.quick-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.action-card {
+  min-height: 105px;
+  border: 1px solid #e8e8ee;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 15px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+}
+
+.action-card:hover {
+  border-color: #c9c4ff;
+}
+
+.action-icon {
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #efedff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+}
+
+.action-card h3 {
+  margin: 0 0 5px;
+  font-size: 0.82rem;
+}
+
+.action-card p {
+  margin: 0;
+  color: #888888;
+  font-size: 0.68rem;
+}
+
+/* Empty shipments */
+
+.empty-shipments {
+  border: 1px solid #e8e8ee;
+  border-radius: 15px;
+  background: #ffffff;
+  text-align: center;
+  padding: 30px 20px;
+}
+
+.empty-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  background: #efedff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.empty-shipments h3 {
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.empty-shipments p {
+  margin: 7px 0 15px;
+  color: #888888;
+  font-size: 0.72rem;
+}
+
+.empty-shipments button {
+  border: none;
+  background: transparent;
+  color: #4930f5;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Bottom navigation */
+
+.bottom-navigation {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 68px;
+  background: #ffffff;
+  border-top: 1px solid #e9e9ef;
+  display: flex;
+  justify-content: center;
+  z-index: 20;
+}
+
+.bottom-nav-item {
+  flex: 1;
+  max-width: 130px;
+  border: none;
+  background: transparent;
+  color: #999999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  cursor: pointer;
+}
+
+.bottom-nav-item span {
+  font-size: 1.15rem;
+}
+
+.bottom-nav-item small {
+  font-size: 0.62rem;
+}
+
+.bottom-nav-item.active {
+  color: #4930f5;
+}
+
+/* Tablet */
+
+@media (min-width: 600px) {
+  .home-screen {
+    padding: 35px 35px 100px;
+  }
+
+  .home-header h1 {
+    font-size: 1.6rem;
+  }
+
+  .tracking-card {
+    padding: 30px;
+  }
+
+  .tracking-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .quick-actions {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .home-screen {
+    padding: 45px 50px 50px;
+  }
+
+  .bottom-navigation {
+    position: static;
+    width: 100%;
+    max-width: 1000px;
+    margin: 35px auto 0;
+    border: 1px solid #e9e9ef;
+    border-radius: 14px;
+  }
+}

@@ -1,8 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./OnboardingScreen.css";
 import onboardingIllustration from "../assets/onboarding-illustration.png";
 
-function OnboardingScreen({ onGetStarted }) {
+function OnboardingScreen() {
+    const navigate = useNavigate();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
@@ -32,7 +34,7 @@ function OnboardingScreen({ onGetStarted }) {
     if (currentSlide < slides.length - 1) {
       setCurrentSlide(currentSlide + 1);
     } else {
-      onGetStarted();
+      navigate("/login");
     }
   };
 

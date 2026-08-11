@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./SignUpScreen.css";
 
-function SignUpScreen({ onLogin }) {
+function SignUpScreen() {
+  const navigate = useNavigate();
+
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -25,8 +28,10 @@ function SignUpScreen({ onLogin }) {
     });
 
     alert(
-      "Account form submitted. Backend registration will be connected later."
+      "Account created successfully. Real registration will be connected to the backend later."
     );
+
+    navigate("/home");
   };
 
   return (
@@ -47,7 +52,7 @@ function SignUpScreen({ onLogin }) {
           <p>Join SwiftParcel and start sending with ease.</p>
         </div>
 
-        {/* Sign Up Form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="signup-form">
 
           {/* Full Name */}
@@ -154,6 +159,7 @@ function SignUpScreen({ onLogin }) {
           >
             Create Account
           </button>
+
         </form>
 
         {/* Login */}
@@ -161,7 +167,7 @@ function SignUpScreen({ onLogin }) {
           Already have an account?{" "}
           <button
             type="button"
-            onClick={onLogin}
+            onClick={() => navigate("/login")}
           >
             Login
           </button>

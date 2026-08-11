@@ -1,45 +1,56 @@
-import React, { useState } from "react";
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+
 import SplashScreen from "./pages/SplashScreen";
 import OnboardingScreen from "./pages/OnboardingScreen";
 import LoginScreen from "./pages/LoginScreen";
 import SignUpScreen from "./pages/SignUpScreen";
+import HomeScreen from "./pages/HomeScreen";
+import SendParcel from "./pages/SendParcel";
 
 function App() {
-  const [currentScreen, setCurrentScreen] = useState("splash");
+  return (
+    <BrowserRouter>
+      <Routes>
 
-  if (currentScreen === "splash") {
-    return (
-      <SplashScreen
-        onFinish={() => setCurrentScreen("onboarding")}
-      />
-    );
-  }
+        {/* Splash */}
+        <Route path="/" element={<SplashScreen />} />
 
-  if (currentScreen === "onboarding") {
-    return (
-      <OnboardingScreen
-        onGetStarted={() => setCurrentScreen("login")}
-      />
-    );
-  }
+        {/* Onboarding */}
+        <Route
+          path="/onboarding"
+          element={<OnboardingScreen />}
+        />
 
-  if (currentScreen === "login") {
-    return (
-      <LoginScreen
-        onSignUp={() => setCurrentScreen("signup")}
-      />
-    );
-  }
+        {/* Authentication */}
+        <Route
+          path="/login"
+          element={<LoginScreen />}
+        />
 
-  if (currentScreen === "signup") {
-    return (
-      <SignUpScreen
-        onLogin={() => setCurrentScreen("login")}
-      />
-    );
-  }
+        <Route
+          path="/signup"
+          element={<SignUpScreen />}
+        />
 
-  return null;
+        {/* Home */}
+        <Route
+          path="/home"
+          element={<HomeScreen />}
+        />
+
+        {/* Unknown URL */}
+        <Route
+          path="*"
+          element={<Navigate to="/" replace />}
+        />
+<Route
+  path="/send-parcel"
+  element={<SendParcel />}
+/>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
 export default App;

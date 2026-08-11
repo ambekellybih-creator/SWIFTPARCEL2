@@ -1,38 +1,37 @@
 import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./SplashScreen.css";
 
-function SplashScreen({ onFinish }) {
+function SplashScreen() {
+  const navigate = useNavigate();
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onFinish();
+      navigate("/onboarding");
     }, 3000);
 
     return () => clearTimeout(timer);
-  }, [onFinish]);
+  }, [navigate]);
 
   return (
     <div className="splash-screen">
       <div className="splash-content">
-
-        <div className="logo-container">
-          <div className="parcel-logo">
-            <div className="parcel-top"></div>
-            <div className="parcel-body"></div>
-            <div className="parcel-tape"></div>
+        <div className="splash-logo">
+          <div className="splash-logo-icon">
+            <span>📦</span>
           </div>
+
+          <h1>SwiftParcel</h1>
         </div>
 
-        <h1>SwiftParcel</h1>
-
-        <p className="splash-subtitle">
+        <p className="splash-tagline">
           Send • Track • Receive
         </p>
 
+        <p className="splash-description">
+          Your parcels, your priority.
+        </p>
       </div>
-
-      <p className="splash-tagline">
-        Your parcels, your priority.
-      </p>
     </div>
   );
 }

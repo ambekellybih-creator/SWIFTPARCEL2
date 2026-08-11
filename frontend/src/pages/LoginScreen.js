@@ -1,7 +1,10 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import "./LoginScreen.css";
 
-function LoginScreen({ onSignUp }) {
+function LoginScreen() {
+const navigate = useNavigate();
+
   const [emailOrPhone, setEmailOrPhone] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -14,7 +17,9 @@ function LoginScreen({ onSignUp }) {
       password,
     });
 
-    alert("Login functionality will be connected to the backend later.");
+    alert("Login UI works. Real authentication will be connected later.");
+
+navigate("/home");
   };
 
   return (
@@ -37,7 +42,7 @@ function LoginScreen({ onSignUp }) {
 
           <button
             className="auth-tab"
-            onClick={onSignUp}
+            onClick={() => navigate("/signup")}
           >
             Sign Up
           </button>
@@ -154,7 +159,7 @@ function LoginScreen({ onSignUp }) {
           Don't have an account?{" "}
           <button
             type="button"
-            onClick={onSignUp}
+            onClick={() => navigate("/signup")}
           >
             Sign Up
           </button>
