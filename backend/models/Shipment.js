@@ -4,8 +4,8 @@ const shipmentSchema = new mongoose.Schema(
   {
     trackingNumber: {
       type: String,
-      required: true,
       unique: true,
+      required: true,
     },
 
     senderName: {
@@ -48,14 +48,9 @@ const shipmentSchema = new mongoose.Schema(
       required: true,
     },
 
-    deliveryStatus: {
+    status: {
       type: String,
       default: "Pending",
-    },
-
-    createdAt: {
-      type: Date,
-      default: Date.now,
     },
   },
   {
@@ -64,4 +59,3 @@ const shipmentSchema = new mongoose.Schema(
 );
 
 module.exports = mongoose.model("Shipment", shipmentSchema);
-

@@ -1,21 +1,21 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const dotenv = require("dotenv");
 const cors = require("cors");
-require("dotenv").config();
 
-const shipmentRoutes = require("./routes/shipmentRoutes");
+const Shipment = require("./models/Shipment");
+
+dotenv.config();
 
 const app = express();
 
 const PORT = process.env.PORT || 5000;
 
-
 // Middleware
 app.use(cors());
 app.use(express.json());
 
-
-// MongoDB Connection
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 10000,
@@ -26,19 +26,62 @@ mongoose
   .catch((error) => {
     console.error("MongoDB connection error:", error);
   });
-// Home route
+
+// Test route
 app.get("/", (req, res) => {
   res.json({
     message: "SwiftParcel backend is running!",
   });
 });
 
+// Create shipment
+app.post("/api/shipments", async (req, res) => {
+  try {
+    const {
+      senderName,
+      senderPhone,
+      senderAddress,
+      receiverName,
+      receiverPhone,
+      receiverAddress,
+      parcelType,
+      weight,
+    } = req.body;
 
-// Shipment routes
-app.use("/api/shipments", shipmentRoutes);
+    // Generate tracking number
+    const trackingNumber =
+      "SP" +
+      Date.now().toString().slice(-8) +
+      Math.floor(100 + Math.random() * 900);
 
+    const shipment = new Shipment({
+      trackingNumber,
+      senderName,
+      senderPhone,
+      senderAddress,
+      receiverName,
+      receiverPhone,
+      receiverAddress,
+      parcelType,
+      weight,
+    });
 
-// Start server
+    await shipment.save();
+
+    res.status(201).json({
+      message: "Shipment created successfully!",
+      shipment,
+    });
+  } catch (error) {
+    console.error("Create shipment error:", error);
+
+    res.status(500).json({
+      message: "Failed to create shipment",
+      error: error.message,
+    });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
