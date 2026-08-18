@@ -19,17 +19,17 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 
-// ===============================
+// ==========================================
 // MIDDLEWARE
-// ===============================
+// ==========================================
 
 app.use(cors());
 app.use(express.json());
 
 
-// ===============================
-// CHECK MONGODB URI
-// ===============================
+// ==========================================
+// CHECK MONGO URI
+// ==========================================
 
 console.log(
   "MONGO_URI loaded:",
@@ -37,16 +37,18 @@ console.log(
 );
 
 
-// ===============================
+// ==========================================
 // MONGODB CONNECTION
-// ===============================
+// ==========================================
 
 mongoose
   .connect(process.env.MONGO_URI, {
     serverSelectionTimeoutMS: 10000
   })
   .then(() => {
-    console.log("MongoDB connected successfully!");
+    console.log(
+      "MongoDB connected successfully!"
+    );
   })
   .catch((error) => {
     console.error(
@@ -56,125 +58,140 @@ mongoose
   });
 
 
-// ===============================
+// ==========================================
 // TEST ROUTE
-// ===============================
+// ==========================================
 
 app.get("/", (req, res) => {
+
   res.json({
-    message: "SwiftParcel backend is running!"
+    message:
+      "SwiftParcel backend is running!"
   });
+
 });
 
 
-// ===============================
+// ==========================================
 // CREATE SHIPMENT
-// ===============================
+// ==========================================
 
-app.post("/api/shipments", async (req, res) => {
+app.post(
+  "/api/shipments",
+  async (req, res) => {
 
-  try {
+    try {
 
-    const {
-      senderName,
-      senderPhone,
-      senderAddress,
-      receiverName,
-      receiverPhone,
-      receiverAddress,
-      parcelType,
-      weight
-    } = req.body;
+      const {
+        senderName,
+        senderPhone,
+        senderAddress,
+        receiverName,
+        receiverPhone,
+        receiverAddress,
+        parcelType,
+        weight
+      } = req.body;
 
 
-    if (
-      !senderName ||
-      !senderPhone ||
-      !senderAddress ||
-      !receiverName ||
-      !receiverPhone ||
-      !receiverAddress ||
-      !parcelType ||
-      !weight
-    ) {
+      if (
+        !senderName ||
+        !senderPhone ||
+        !senderAddress ||
+        !receiverName ||
+        !receiverPhone ||
+        !receiverAddress ||
+        !parcelType ||
+        !weight
+      ) {
 
-      return res.status(400).json({
+        return res.status(400).json({
+          message:
+            "Please provide all required shipment information."
+        });
+
+      }
+
+
+      // Generate tracking number
+
+      const trackingNumber =
+        "SP" +
+        Date.now()
+          .toString()
+          .slice(-8) +
+        Math.floor(
+          100 +
+          Math.random() * 900
+        );
+
+
+      const shipment =
+        new Shipment({
+
+          trackingNumber,
+
+          senderName,
+
+          senderPhone,
+
+          senderAddress,
+
+          receiverName,
+
+          receiverPhone,
+
+          receiverAddress,
+
+          parcelType,
+
+          weight,
+
+          status:
+            "Pending"
+
+        });
+
+
+      await shipment.save();
+
+
+      res.status(201).json({
+
         message:
-          "Please provide all required shipment information."
+          "Shipment created successfully!",
+
+        shipment
+
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Create shipment error:",
+        error
+      );
+
+
+      res.status(500).json({
+
+        message:
+          "Failed to create shipment",
+
+        error:
+          error.message
+
       });
 
     }
 
-
-    const trackingNumber =
-      "SP" +
-      Date.now()
-        .toString()
-        .slice(-8) +
-      Math.floor(
-        100 + Math.random() * 900
-      );
-
-
-    const shipment = new Shipment({
-
-      trackingNumber,
-
-      senderName,
-      senderPhone,
-      senderAddress,
-
-      receiverName,
-      receiverPhone,
-      receiverAddress,
-
-      parcelType,
-
-      weight,
-
-      status: "Pending"
-
-    });
-
-
-    await shipment.save();
-
-
-    res.status(201).json({
-
-      message:
-        "Shipment created successfully!",
-
-      shipment
-
-    });
-
-  } catch (error) {
-
-    console.error(
-      "Create shipment error:",
-      error
-    );
-
-
-    res.status(500).json({
-
-      message:
-        "Failed to create shipment",
-
-      error:
-        error.message
-
-    });
-
   }
+);
 
-});
 
-
-// ===============================
+// ==========================================
 // FIND SHIPMENT
-// ===============================
+// ==========================================
 
 app.get(
   "/api/shipments/:trackingNumber",
@@ -238,9 +255,9 @@ app.get(
 );
 
 
-// ===============================
+// ==========================================
 // GET ALL SHIPMENTS
-// ===============================
+// ==========================================
 
 app.get(
   "/api/shipments",
@@ -284,9 +301,128 @@ app.get(
   }
 );
 
-// ===============================
+
+// ==========================================
+// UPDATE SHIPMENT STATUS
+// ==========================================
+
+app.patch(
+  "/api/shipments/:trackingNumber/status",
+  async (req, res) => {
+
+    try {
+
+      const trackingNumber =
+        req.params.trackingNumber.trim();
+
+      const { status } =
+        req.body;
+
+
+      // Allowed statuses
+
+      const allowedStatuses = [
+
+        "Pending",
+
+        "Picked Up",
+
+        "In Transit",
+
+        "Out for Delivery",
+
+        "Delivered"
+
+      ];
+
+
+      // Check status
+
+      if (
+        !status ||
+        !allowedStatuses.includes(
+          status
+        )
+      ) {
+
+        return res.status(400).json({
+
+          message:
+            "Invalid shipment status.",
+
+          allowedStatuses
+
+        });
+
+      }
+
+
+      // Find shipment
+
+      const shipment =
+        await Shipment.findOne({
+          trackingNumber:
+            trackingNumber
+        });
+
+
+      if (!shipment) {
+
+        return res.status(404).json({
+
+          message:
+            "Shipment not found."
+
+        });
+
+      }
+
+
+      // Update status
+
+      shipment.status =
+        status;
+
+
+      await shipment.save();
+
+
+      res.status(200).json({
+
+        message:
+          "Shipment status updated successfully!",
+
+        shipment
+
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Update status error:",
+        error
+      );
+
+
+      res.status(500).json({
+
+        message:
+          "Failed to update shipment status.",
+
+        error:
+          error.message
+
+      });
+
+    }
+
+  }
+);
+
+
+// ==========================================
 // DELETE SHIPMENT
-// ===============================
+// ==========================================
 
 app.delete(
   "/api/shipments/:trackingNumber",
@@ -300,8 +436,10 @@ app.delete(
 
       const shipment =
         await Shipment.findOneAndDelete({
+
           trackingNumber:
             trackingNumber
+
         });
 
 
@@ -348,14 +486,17 @@ app.delete(
 );
 
 
-// ===============================
+// ==========================================
 // START SERVER
-// ===============================
+// ==========================================
 
-app.listen(PORT, () => {
+app.listen(
+  PORT,
+  () => {
 
-  console.log(
-    `Server running on port ${PORT}`
-  );
+    console.log(
+      `Server running on port ${PORT}`
+    );
 
-});
+  }
+);
