@@ -1,9 +1,94 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomeScreen.css";
 
 function HomeScreen() {
   const navigate = useNavigate();
+
+  const [trackingNumber, setTrackingNumber] = useState("");
+  const [trackingLoading, setTrackingLoading] = useState(false);
+  const [trackingError, setTrackingError] = useState("");
+  const [shipment, setShipment] = useState(null);
+
+  const handleTrack = async () => {
+    const number = trackingNumber.trim();
+
+    if (!number) {
+      setTrackingError("Please enter a tracking number.");
+      return;
+    }
+
+    setTrackingLoading(true);
+    setTrackingError("");
+    setShipment(null);
+
+    try {
+      const apiUrl =
+        process.env.REACT_APP_API_URL ||
+        "http://localhost:5000";
+
+      const response = await fetch(
+        `${apiUrl}/api/shipments/${encodeURIComponent(number)}`
+      );
+
+      const responseText = await response.text();
+
+      if (!response.ok) {
+        let message = "Shipment not found.";
+
+        try {
+          const errorData = JSON.parse(responseText);
+          message = errorData.message || message;
+        } catch {
+          // Keep default message
+        }
+
+        throw new Error(message);
+      }
+
+      const data = JSON.parse(responseText);
+
+      setShipment(data.shipment);
+
+    } catch (error) {
+      console.error("Tracking error:", error);
+
+      setTrackingError(
+        error.message || "Unable to track shipment."
+      );
+
+    } finally {
+      setTrackingLoading(false);
+    }
+  };
+
+
+  // ===============================
+  // TRACKING TIMELINE
+  // ===============================
+
+  const getStatusStep = (status) => {
+
+    const statuses = [
+      "Pending",
+      "Picked Up",
+      "In Transit",
+      "Out for Delivery",
+      "Delivered",
+    ];
+
+    const currentIndex =
+      statuses.indexOf(status);
+
+    return statuses.map((item, index) => ({
+      name: item,
+      completed:
+        currentIndex >= index,
+      current:
+        currentIndex === index,
+    }));
+  };
+
 
   return (
     <div className="home-screen">
@@ -13,6 +98,7 @@ function HomeScreen() {
       <header className="home-header">
 
         <div>
+
           <p className="home-greeting">
             Good day 👋
           </p>
@@ -20,6 +106,7 @@ function HomeScreen() {
           <h1>
             Welcome to SwiftParcel
           </h1>
+
         </div>
 
         <button
@@ -27,7 +114,9 @@ function HomeScreen() {
           type="button"
           aria-label="Notifications"
           onClick={() => {
-            alert("Notifications will be available soon.");
+            alert(
+              "Notifications will be available soon."
+            );
           }}
         >
           🔔
@@ -55,24 +144,159 @@ function HomeScreen() {
             <input
               type="text"
               placeholder="Enter tracking number"
+              value={trackingNumber}
+              onChange={(event) =>
+                setTrackingNumber(
+                  event.target.value
+                )
+              }
+              onKeyDown={(event) => {
+                if (event.key === "Enter") {
+                  handleTrack();
+                }
+              }}
             />
 
             <button
               type="button"
-              onClick={() => {
-                alert(
-                  "Parcel tracking will be connected next."
-                );
-              }}
+              onClick={handleTrack}
+              disabled={trackingLoading}
             >
-              Track
+              {trackingLoading
+                ? "Tracking..."
+                : "Track"}
             </button>
 
           </div>
 
+          {trackingError && (
+            <p className="tracking-error">
+              {trackingError}
+            </p>
+          )}
+
         </div>
 
       </section>
+
+
+      {/* ================= TRACKING RESULT ================= */}
+
+      {shipment && (
+        <section className="home-section">
+
+          <div className="tracking-result">
+
+            <h2>
+              Shipment Found 🎉
+            </h2>
+
+            <div className="tracking-result-details">
+
+              <p>
+                <strong>
+                  Tracking Number:
+                </strong>{" "}
+                {shipment.trackingNumber}
+              </p>
+
+              <p>
+                <strong>
+                  Current Status:
+                </strong>{" "}
+                {shipment.status}
+              </p>
+
+              <p>
+                <strong>
+                  Sender:
+                </strong>{" "}
+                {shipment.senderName}
+              </p>
+
+              <p>
+                <strong>
+                  Receiver:
+                </strong>{" "}
+                {shipment.receiverName}
+              </p>
+
+              <p>
+                <strong>
+                  Parcel Type:
+                </strong>{" "}
+                {shipment.parcelType}
+              </p>
+
+              <p>
+                <strong>
+                  Weight:
+                </strong>{" "}
+                {shipment.weight} kg
+              </p>
+
+            </div>
+
+
+            {/* ================= TIMELINE ================= */}
+
+            <div className="tracking-timeline">
+
+              <h3>
+                Shipment Progress
+              </h3>
+
+              {getStatusStep(
+                shipment.status
+              ).map((step, index) => (
+
+                <div
+                  className={`timeline-step ${
+                    step.completed
+                      ? "completed"
+                      : ""
+                  } ${
+                    step.current
+                      ? "current"
+                      : ""
+                  }`}
+                  key={step.name}
+                >
+
+                  <div className="timeline-icon">
+
+                    {step.completed
+                      ? "✓"
+                      : index + 1}
+
+                  </div>
+
+                  <div className="timeline-content">
+
+                    <strong>
+                      {step.name}
+                    </strong>
+
+                    <p>
+                      {step.current
+                        ? "Your shipment is currently at this stage."
+                        : step.completed
+                        ? "Completed"
+                        : "Not yet reached"}
+                    </p>
+
+                  </div>
+
+                </div>
+
+              ))}
+
+            </div>
+
+          </div>
+
+        </section>
+      )}
 
 
       {/* ================= QUICK ACTIONS ================= */}
@@ -87,15 +311,14 @@ function HomeScreen() {
 
         </div>
 
-
         <div className="quick-actions">
-
-          {/* SEND PARCEL */}
 
           <button
             className="action-card"
             type="button"
-            onClick={() => navigate("/send-parcel")}
+            onClick={() =>
+              navigate("/send-parcel")
+            }
           >
 
             <div className="action-icon">
@@ -103,6 +326,7 @@ function HomeScreen() {
             </div>
 
             <div>
+
               <h3>
                 Send Parcel
               </h3>
@@ -110,20 +334,21 @@ function HomeScreen() {
               <p>
                 Send a package
               </p>
+
             </div>
 
           </button>
 
 
-          {/* TRACK PARCEL */}
-
           <button
             className="action-card"
             type="button"
             onClick={() => {
-              alert(
-                "Track Parcel will be built next."
-              );
+              document
+                .querySelector(
+                  ".tracking-input input"
+                )
+                ?.focus();
             }}
           >
 
@@ -132,6 +357,7 @@ function HomeScreen() {
             </div>
 
             <div>
+
               <h3>
                 Track Parcel
               </h3>
@@ -139,6 +365,7 @@ function HomeScreen() {
               <p>
                 Track your delivery
               </p>
+
             </div>
 
           </button>
@@ -162,7 +389,7 @@ function HomeScreen() {
             type="button"
             onClick={() => {
               alert(
-                "Your shipments will appear here."
+                "Recent shipments will be expanded soon."
               );
             }}
           >
@@ -170,7 +397,6 @@ function HomeScreen() {
           </button>
 
         </div>
-
 
         <div className="empty-shipments">
 
@@ -188,7 +414,9 @@ function HomeScreen() {
 
           <button
             type="button"
-            onClick={() => navigate("/send-parcel")}
+            onClick={() =>
+              navigate("/send-parcel")
+            }
           >
             Send your first parcel
           </button>
@@ -202,26 +430,17 @@ function HomeScreen() {
 
       <nav className="bottom-navigation">
 
-        {/* HOME */}
-
         <button
           className="bottom-nav-item active"
           type="button"
-          onClick={() => navigate("/home")}
+          onClick={() =>
+            navigate("/home")
+          }
         >
-
-          <span>
-            ⌂
-          </span>
-
-          <small>
-            Home
-          </small>
-
+          <span>⌂</span>
+          <small>Home</small>
         </button>
 
-
-        {/* SHIPMENTS */}
 
         <button
           className="bottom-nav-item"
@@ -232,42 +451,26 @@ function HomeScreen() {
             );
           }}
         >
-
-          <span>
-            ▣
-          </span>
-
-          <small>
-            Shipments
-          </small>
-
+          <span>▣</span>
+          <small>Shipments</small>
         </button>
 
-
-        {/* TRACK */}
 
         <button
           className="bottom-nav-item"
           type="button"
           onClick={() => {
-            alert(
-              "Tracking page will be built soon."
-            );
+            document
+              .querySelector(
+                ".tracking-input input"
+              )
+              ?.focus();
           }}
         >
-
-          <span>
-            ⌖
-          </span>
-
-          <small>
-            Track
-          </small>
-
+          <span>⌖</span>
+          <small>Track</small>
         </button>
 
-
-        {/* PROFILE */}
 
         <button
           className="bottom-nav-item"
@@ -278,15 +481,8 @@ function HomeScreen() {
             );
           }}
         >
-
-          <span>
-            ◯
-          </span>
-
-          <small>
-            Profile
-          </small>
-
+          <span>◯</span>
+          <small>Profile</small>
         </button>
 
       </nav>

@@ -1,0 +1,326 @@
+.confirm-shipment-screen {
+  min-height: 100vh;
+  width: 100%;
+  background: #f7f7fb;
+  color: #171717;
+  box-sizing: border-box;
+  padding-bottom: 40px;
+}
+
+/* Header */
+
+.confirm-header {
+  width: 100%;
+  max-width: 850px;
+  height: 65px;
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  background: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+}
+
+.confirm-header h1 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.back-button {
+  width: 38px;
+  height: 38px;
+  border: none;
+  background: transparent;
+  font-size: 1.5rem;
+  color: #222222;
+  cursor: pointer;
+}
+
+.back-button:hover {
+  color: #4930f5;
+}
+
+.header-placeholder {
+  width: 38px;
+}
+
+/* Progress */
+
+.parcel-progress {
+  width: 100%;
+  max-width: 700px;
+  margin: 25px auto 0;
+  padding: 0 20px;
+  box-sizing: border-box;
+
+  display: flex;
+  align-items: center;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 45px;
+}
+
+.progress-step span {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+
+  background: #e4e4ea;
+  color: #888888;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.progress-step p {
+  margin: 5px 0 0;
+  color: #999999;
+  font-size: 0.6rem;
+}
+
+.progress-step.active span,
+.progress-step.completed span {
+  background: #4930f5;
+  color: #ffffff;
+}
+
+.progress-step.active p,
+.progress-step.completed p {
+  color: #4930f5;
+  font-weight: 600;
+}
+
+.progress-line {
+  flex: 1;
+  height: 1px;
+  background: #dedee6;
+  margin: 0 5px 18px;
+}
+
+.active-line {
+  background: #4930f5;
+}
+
+/* Main */
+
+.confirm-content {
+  width: calc(100% - 40px);
+  max-width: 600px;
+  margin: 30px auto 0;
+}
+
+/* Title */
+
+.confirm-title {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+.confirmation-icon {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 12px;
+
+  border-radius: 50%;
+  background: #4930f5;
+  color: #ffffff;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+.confirm-title h2 {
+  margin: 0 0 7px;
+  font-size: 1.25rem;
+}
+
+.confirm-title p {
+  margin: 0;
+  color: #888888;
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+
+/* Summary Card */
+
+.summary-card {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 20px;
+  margin-bottom: 14px;
+
+  box-sizing: border-box;
+
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  border-bottom: 1px solid #eeeeee;
+
+  padding-bottom: 12px;
+  margin-bottom: 13px;
+}
+
+.summary-header h3 {
+  margin: 0;
+  font-size: 0.85rem;
+}
+
+.summary-header button {
+  border: none;
+  background: transparent;
+
+  color: #4930f5;
+
+  font-size: 0.7rem;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.summary-details p {
+  margin: 8px 0;
+
+  color: #777777;
+
+  font-size: 0.73rem;
+  line-height: 1.5;
+}
+
+.summary-details strong {
+  color: #333333;
+}
+
+/* Delivery Summary */
+
+.delivery-summary {
+  background: #f0eeff;
+  border-radius: 14px;
+
+  padding: 18px 20px;
+
+  margin: 18px 0;
+
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.delivery-summary div {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.delivery-summary span {
+  color: #777777;
+  font-size: 0.72rem;
+}
+
+.delivery-summary strong {
+  color: #333333;
+  font-size: 0.75rem;
+  text-align: right;
+}
+
+/* Confirm */
+
+.confirm-button {
+  width: 100%;
+  height: 48px;
+
+  border: none;
+  border-radius: 10px;
+
+  background: linear-gradient(
+    90deg,
+    #4c31f5,
+    #3725ed
+  );
+
+  color: #ffffff;
+
+  font-size: 0.86rem;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: 0.2s ease;
+}
+
+.confirm-button:hover {
+  opacity: 0.92;
+}
+
+.confirm-button:active {
+  transform: scale(0.99);
+}
+
+/* Cancel */
+
+.cancel-button {
+  width: 100%;
+  height: 45px;
+
+  margin-top: 8px;
+
+  border: none;
+  background: transparent;
+
+  color: #777777;
+
+  font-size: 0.78rem;
+
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  color: #4930f5;
+}
+
+/* Tablet */
+
+@media (min-width: 600px) {
+  .confirm-content {
+    max-width: 650px;
+  }
+
+  .confirm-title h2 {
+    font-size: 1.4rem;
+  }
+
+  .delivery-summary {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+}
+
+/* Desktop */
+
+@media (min-width: 1024px) {
+  .confirm-content {
+    margin-top: 35px;
+  }
+}

@@ -15,14 +15,20 @@ function ParcelDetails() {
   const handleContinue = (event) => {
     event.preventDefault();
 
-    console.log("Parcel Details:", {
+    const parcelData = {
       parcelType,
       weight,
       packageSize,
       description,
       fragile,
       deliveryDate,
-    });
+    };
+
+    // Save parcel information
+    localStorage.setItem(
+      "swiftparcelParcel",
+      JSON.stringify(parcelData)
+    );
 
     navigate("/confirm-shipment");
   };
@@ -46,7 +52,6 @@ function ParcelDetails() {
         <div className="header-placeholder"></div>
 
       </header>
-
 
       {/* Progress */}
       <div className="parcel-progress">
@@ -79,7 +84,6 @@ function ParcelDetails() {
 
       </div>
 
-
       {/* Main Content */}
       <main className="parcel-details-content">
 
@@ -92,7 +96,6 @@ function ParcelDetails() {
           </p>
 
         </div>
-
 
         <form
           className="parcel-details-form"
@@ -114,6 +117,7 @@ function ParcelDetails() {
               }
               required
             >
+
               <option value="">
                 Select parcel type
               </option>
@@ -146,7 +150,6 @@ function ParcelDetails() {
 
           </div>
 
-
           {/* Weight */}
           <div className="parcel-form-group">
 
@@ -174,7 +177,6 @@ function ParcelDetails() {
             </div>
 
           </div>
-
 
           {/* Package Size */}
           <div className="parcel-form-group">
@@ -216,7 +218,6 @@ function ParcelDetails() {
 
           </div>
 
-
           {/* Description */}
           <div className="parcel-form-group">
 
@@ -236,7 +237,6 @@ function ParcelDetails() {
             ></textarea>
 
           </div>
-
 
           {/* Fragile */}
           <div className="fragile-option">
@@ -261,7 +261,6 @@ function ParcelDetails() {
 
           </div>
 
-
           {/* Delivery Date */}
           <div className="parcel-form-group">
 
@@ -280,7 +279,6 @@ function ParcelDetails() {
             />
 
           </div>
-
 
           {/* Continue */}
           <button

@@ -14,13 +14,19 @@ function Receiver() {
   const handleContinue = (event) => {
     event.preventDefault();
 
-    console.log("Receiver Information:", {
+    const receiverData = {
       fullName,
       phone,
       email,
       address,
       city,
-    });
+    };
+
+    // Save receiver information
+    localStorage.setItem(
+      "swiftparcelReceiver",
+      JSON.stringify(receiverData)
+    );
 
     navigate("/parcel-details");
   };
@@ -30,6 +36,7 @@ function Receiver() {
 
       {/* Header */}
       <header className="receiver-header">
+
         <button
           type="button"
           className="back-button"
@@ -41,7 +48,9 @@ function Receiver() {
         <h1>Send Parcel</h1>
 
         <div className="header-placeholder"></div>
+
       </header>
+
 
       {/* Progress */}
       <div className="parcel-progress">
@@ -74,16 +83,20 @@ function Receiver() {
 
       </div>
 
+
       {/* Main content */}
       <main className="receiver-content">
 
         <div className="receiver-title">
+
           <h2>Receiver Information</h2>
 
           <p>
             Tell us where the parcel will be delivered.
           </p>
+
         </div>
+
 
         <form
           className="receiver-form"
@@ -92,6 +105,7 @@ function Receiver() {
 
           {/* Full Name */}
           <div className="receiver-form-group">
+
             <label htmlFor="receiverName">
               Full Name
             </label>
@@ -106,10 +120,13 @@ function Receiver() {
               }
               required
             />
+
           </div>
+
 
           {/* Phone */}
           <div className="receiver-form-group">
+
             <label htmlFor="receiverPhone">
               Phone Number
             </label>
@@ -132,10 +149,13 @@ function Receiver() {
               />
 
             </div>
+
           </div>
+
 
           {/* Email */}
           <div className="receiver-form-group">
+
             <label htmlFor="receiverEmail">
               Email Address
             </label>
@@ -150,10 +170,13 @@ function Receiver() {
               }
               required
             />
+
           </div>
+
 
           {/* Delivery Address */}
           <div className="receiver-form-group">
+
             <label htmlFor="receiverAddress">
               Delivery Address
             </label>
@@ -168,10 +191,13 @@ function Receiver() {
               rows="3"
               required
             ></textarea>
+
           </div>
+
 
           {/* City */}
           <div className="receiver-form-group">
+
             <label htmlFor="receiverCity">
               City
             </label>
@@ -186,7 +212,9 @@ function Receiver() {
               }
               required
             />
+
           </div>
+
 
           {/* Continue */}
           <button

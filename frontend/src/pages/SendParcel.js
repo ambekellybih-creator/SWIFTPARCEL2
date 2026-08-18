@@ -14,13 +14,19 @@ function SendParcel() {
   const handleContinue = (event) => {
     event.preventDefault();
 
-    console.log("Sender information:", {
+    const senderData = {
       fullName,
       phone,
       email,
       address,
       city,
-    });
+    };
+
+    // Save sender information
+    localStorage.setItem(
+      "swiftparcelSender",
+      JSON.stringify(senderData)
+    );
 
     navigate("/receiver");
   };
@@ -28,7 +34,6 @@ function SendParcel() {
   return (
     <div className="send-parcel-screen">
 
-      {/* Header */}
       <header className="send-parcel-header">
         <button
           type="button"
@@ -43,8 +48,8 @@ function SendParcel() {
         <div className="header-placeholder"></div>
       </header>
 
-      {/* Progress */}
       <div className="parcel-progress">
+
         <div className="progress-step active">
           <span>1</span>
           <p>Sender</p>
@@ -70,9 +75,9 @@ function SendParcel() {
           <span>4</span>
           <p>Confirm</p>
         </div>
+
       </div>
 
-      {/* Main content */}
       <main className="send-parcel-content">
 
         <div className="send-parcel-title">
@@ -88,7 +93,6 @@ function SendParcel() {
           onSubmit={handleContinue}
         >
 
-          {/* Full Name */}
           <div className="sender-form-group">
             <label htmlFor="senderName">
               Full Name
@@ -106,7 +110,6 @@ function SendParcel() {
             />
           </div>
 
-          {/* Phone */}
           <div className="sender-form-group">
             <label htmlFor="senderPhone">
               Phone Number
@@ -128,7 +131,6 @@ function SendParcel() {
             </div>
           </div>
 
-          {/* Email */}
           <div className="sender-form-group">
             <label htmlFor="senderEmail">
               Email Address
@@ -146,7 +148,6 @@ function SendParcel() {
             />
           </div>
 
-          {/* Pickup Address */}
           <div className="sender-form-group">
             <label htmlFor="senderAddress">
               Pickup Address
@@ -164,7 +165,6 @@ function SendParcel() {
             ></textarea>
           </div>
 
-          {/* City */}
           <div className="sender-form-group">
             <label htmlFor="senderCity">
               City
@@ -182,7 +182,6 @@ function SendParcel() {
             />
           </div>
 
-          {/* Continue */}
           <button
             type="submit"
             className="continue-button"
@@ -191,7 +190,9 @@ function SendParcel() {
           </button>
 
         </form>
+
       </main>
+
     </div>
   );
 }
