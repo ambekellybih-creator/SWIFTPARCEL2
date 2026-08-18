@@ -1,13 +1,7 @@
 import React from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import SplashScreen from "./pages/SplashScreen";
-import OnboardingScreen from "./pages/OnboardingScreen";
 import LoginScreen from "./pages/LoginScreen";
 import SignUpScreen from "./pages/SignUpScreen";
 import HomeScreen from "./pages/HomeScreen";
@@ -16,32 +10,27 @@ import Receiver from "./pages/Receiver";
 import ParcelDetails from "./pages/ParcelDetails";
 import ConfirmShipment from "./pages/ConfirmShipment";
 import Shipments from "./pages/Shipments";
-
+import AdminLogin from "./pages/AdminLogin";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   return (
     <BrowserRouter>
+
       <Routes>
 
-        {/* Splash Screen */}
+        {/* Splash */}
         <Route
           path="/"
           element={<SplashScreen />}
         />
 
-        {/* Onboarding */}
-        <Route
-          path="/onboarding"
-          element={<OnboardingScreen />}
-        />
-
-        {/* Login */}
+        {/* Authentication */}
         <Route
           path="/login"
           element={<LoginScreen />}
         />
 
-        {/* Sign Up */}
         <Route
           path="/signup"
           element={<SignUpScreen />}
@@ -53,25 +42,25 @@ function App() {
           element={<HomeScreen />}
         />
 
-        {/* Send Parcel - Step 1 */}
+        {/* Send Parcel */}
         <Route
           path="/send-parcel"
           element={<SendParcel />}
         />
 
-        {/* Receiver - Step 2 */}
+        {/* Receiver */}
         <Route
           path="/receiver"
           element={<Receiver />}
         />
 
-        {/* Parcel Details - Step 3 */}
+        {/* Parcel Details */}
         <Route
           path="/parcel-details"
           element={<ParcelDetails />}
         />
 
-        {/* Confirm Shipment - Step 4 */}
+        {/* Confirm Shipment */}
         <Route
           path="/confirm-shipment"
           element={<ConfirmShipment />}
@@ -83,23 +72,20 @@ function App() {
           element={<Shipments />}
         />
 
-        {/* Unknown Routes */}
+        {/* Admin Login */}
         <Route
-          path="*"
-          element={
-            <Navigate
-              to="/"
-              replace
-            />
-          }
+          path="/admin-login"
+          element={<AdminLogin />}
         />
 
+        {/* Admin Dashboard */}
         <Route
-  path="/shipments"
-  element={<Shipments />}
-/>
+          path="/admin"
+          element={<AdminDashboard />}
+        />
 
       </Routes>
+
     </BrowserRouter>
   );
 }

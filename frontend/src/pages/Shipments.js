@@ -9,13 +9,17 @@ function Shipments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [updatingTrackingNumber, setUpdatingTrackingNumber] =
+    useState("");
+
   const apiUrl =
     process.env.REACT_APP_API_URL ||
     "http://localhost:5000";
 
-  // =========================================
+
+  // ==========================================
   // LOAD SHIPMENTS
-  // =========================================
+  // ==========================================
 
   const loadShipments = async () => {
     try {
@@ -34,7 +38,10 @@ function Shipments() {
 
       const data = await response.json();
 
-      setShipments(data.shipments || []);
+      setShipments(
+        data.shipments || []
+      );
+
     } catch (error) {
       console.error(
         "Loading shipments error:",
@@ -42,133 +49,232 @@ function Shipments() {
       );
 
       setError(
-        "Unable to load your shipments."
+        "Unable to load shipments."
       );
+
     } finally {
       setLoading(false);
     }
   };
 
-  // =========================================
+
+  // ==========================================
   // LOAD WHEN PAGE OPENS
-  // =========================================
+  // ==========================================
 
   useEffect(() => {
     loadShipments();
   }, []);
 
-  // =========================================
-  // FORMAT DATE
-  // =========================================
 
-  const formatDate = (date) => {
-    if (!date) {
-      return "Unknown date";
-    }
+  // ==========================================
+  // UPDATE STATUS
+  // ==========================================
 
-    return new Date(date).toLocaleDateString(
-      "en-GB",
-      {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-      }
-    );
-  };
+  const handleStatusChange = async (
+    trackingNumber,
+    newStatus
+  ) => {
 
-  // =========================================
-  // TRACK SHIPMENT
-  // =========================================
+    try {
 
-  const handleTrackShipment = (trackingNumber) => {
-    navigate(
-      `/home?tracking=${encodeURIComponent(
+      setUpdatingTrackingNumber(
         trackingNumber
-      )}`
-    );
+      );
+
+      const response = await fetch(
+        `${apiUrl}/api/shipments/${encodeURIComponent(
+          trackingNumber
+        )}/status`,
+        {
+          method: "PATCH",
+
+          headers: {
+            "Content-Type":
+              "application/json"
+          },
+
+          body: JSON.stringify({
+            status: newStatus
+          })
+        }
+      );
+
+
+      const data =
+        await response.json();
+
+
+      if (!response.ok) {
+
+        throw new Error(
+          data.message ||
+          "Failed to update status."
+        );
+
+      }
+
+
+      // Update shipment on the page
+
+      setShipments((currentShipments) =>
+        currentShipments.map(
+          (shipment) =>
+            shipment.trackingNumber ===
+            trackingNumber
+              ? {
+                  ...shipment,
+                  status:
+                    data.shipment.status
+                }
+              : shipment
+        )
+      );
+
+
+    } catch (error) {
+
+      console.error(
+        "Status update error:",
+        error
+      );
+
+      alert(
+        error.message ||
+        "Unable to update shipment status."
+      );
+
+    } finally {
+
+      setUpdatingTrackingNumber("");
+
+    }
   };
 
-  return (
-    <div className="shipments-screen">
 
-      {/* =====================================
-          HEADER
-      ===================================== */}
+  // ==========================================
+  // STATUS CLASS
+  // ==========================================
 
-      <header className="shipments-header">
+  const getStatusClass = (status) => {
 
-        <button
-          type="button"
-          className="shipments-back-button"
-          onClick={() => navigate("/home")}
-        >
-          ←
-        </button>
+    return (
+      status
+        ?.toLowerCase()
+        .replace(/\s+/g, "-") ||
+      "pending"
+    );
 
-        <h1>My Shipments</h1>
-
-        <div className="shipments-header-placeholder"></div>
-
-      </header>
+  };
 
 
-      {/* =====================================
-          MAIN CONTENT
-      ===================================== */}
+  // ==========================================
+  // LOADING
+  // ==========================================
 
-      <main className="shipments-content">
+  if (loading) {
 
-        <div className="shipments-title">
+    return (
 
-          <h2>Recent Shipments</h2>
+      <div className="shipments-screen">
 
-          <p>
-            View and track all your parcels.
-          </p>
+        <header className="shipments-header">
 
-        </div>
+          <button
+            className="shipments-back-button"
+            type="button"
+            onClick={() =>
+              navigate("/home")
+            }
+          >
+            ←
+          </button>
+
+          <h1>
+            My Shipments
+          </h1>
+
+          <div></div>
+
+        </header>
 
 
-        {/* ===================================
-            LOADING
-        =================================== */}
+        <main className="shipments-content">
 
-        {loading && (
+          <div className="shipments-message">
 
-          <div className="shipments-loading">
+            <div className="shipments-message-icon">
+              📦
+            </div>
+
+            <h2>
+              Loading shipments...
+            </h2>
 
             <p>
-              Loading your shipments...
+              Please wait while we load your shipments.
             </p>
 
           </div>
 
-        )}
+        </main>
+
+      </div>
+
+    );
+  }
 
 
-        {/* ===================================
-            ERROR
-        =================================== */}
+  // ==========================================
+  // ERROR
+  // ==========================================
 
-        {!loading && error && (
+  if (error) {
 
-          <div className="shipments-empty">
+    return (
 
-            <div className="shipments-empty-icon">
+      <div className="shipments-screen">
+
+        <header className="shipments-header">
+
+          <button
+            className="shipments-back-button"
+            type="button"
+            onClick={() =>
+              navigate("/home")
+            }
+          >
+            ←
+          </button>
+
+          <h1>
+            My Shipments
+          </h1>
+
+          <div></div>
+
+        </header>
+
+
+        <main className="shipments-content">
+
+          <div className="shipments-message">
+
+            <div className="shipments-message-icon">
               ⚠️
             </div>
 
-            <h3>
+            <h2>
               Something went wrong
-            </h3>
+            </h2>
 
             <p>
               {error}
             </p>
 
             <button
+              className="try-again-button"
               type="button"
-              className="shipments-try-again-button"
               onClick={loadShipments}
             >
               Try Again
@@ -176,228 +282,307 @@ function Shipments() {
 
           </div>
 
-        )}
+        </main>
+
+      </div>
+
+    );
+  }
 
 
-        {/* ===================================
-            NO SHIPMENTS
-        =================================== */}
+  // ==========================================
+  // NO SHIPMENTS
+  // ==========================================
 
-        {!loading &&
-          !error &&
-          shipments.length === 0 && (
+  if (shipments.length === 0) {
 
-            <div className="shipments-empty">
+    return (
 
-              <div className="shipments-empty-icon">
-                📦
+      <div className="shipments-screen">
+
+        <header className="shipments-header">
+
+          <button
+            className="shipments-back-button"
+            type="button"
+            onClick={() =>
+              navigate("/home")
+            }
+          >
+            ←
+          </button>
+
+          <h1>
+            My Shipments
+          </h1>
+
+          <div></div>
+
+        </header>
+
+
+        <main className="shipments-content">
+
+          <div className="shipments-message">
+
+            <div className="shipments-message-icon">
+              📦
+            </div>
+
+            <h2>
+              No shipments yet
+            </h2>
+
+            <p>
+              Your shipments will appear here.
+            </p>
+
+            <button
+              className="create-shipment-button"
+              type="button"
+              onClick={() =>
+                navigate("/send-parcel")
+              }
+            >
+              Send a Parcel
+            </button>
+
+          </div>
+
+        </main>
+
+      </div>
+
+    );
+  }
+
+
+  // ==========================================
+  // SHIPMENTS PAGE
+  // ==========================================
+
+  return (
+
+    <div className="shipments-screen">
+
+      {/* HEADER */}
+
+      <header className="shipments-header">
+
+        <button
+          className="shipments-back-button"
+          type="button"
+          onClick={() =>
+            navigate("/home")
+          }
+        >
+          ←
+        </button>
+
+        <h1>
+          My Shipments
+        </h1>
+
+        <div></div>
+
+      </header>
+
+
+      {/* CONTENT */}
+
+      <main className="shipments-content">
+
+        <div className="shipments-title">
+
+          <h2>
+            Your Shipments
+          </h2>
+
+          <p>
+            Manage and track your parcels.
+          </p>
+
+        </div>
+
+
+        <div className="shipments-list">
+
+          {shipments.map((shipment) => (
+
+            <div
+              className="shipment-item"
+              key={shipment._id}
+            >
+
+              {/* TOP */}
+
+              <div className="shipment-item-top">
+
+                <div className="shipment-item-icon">
+                  📦
+                </div>
+
+
+                <div className="shipment-item-info">
+
+                  <h3>
+                    {shipment.trackingNumber}
+                  </h3>
+
+                  <p>
+                    To: {shipment.receiverName}
+                  </p>
+
+                </div>
+
+
+                <span
+                  className={`shipment-status ${getStatusClass(
+                    shipment.status
+                  )}`}
+                >
+                  {shipment.status}
+                </span>
+
               </div>
 
-              <h3>
-                No shipments yet
-              </h3>
 
-              <p>
-                You haven't created any
-                shipments yet.
-              </p>
+              {/* DETAILS */}
+
+              <div className="shipment-item-details">
+
+                <div>
+                  <span>
+                    Parcel
+                  </span>
+
+                  <strong>
+                    {shipment.parcelType}
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    Weight
+                  </span>
+
+                  <strong>
+                    {shipment.weight} kg
+                  </strong>
+                </div>
+
+
+                <div>
+                  <span>
+                    Sender
+                  </span>
+
+                  <strong>
+                    {shipment.senderName}
+                  </strong>
+                </div>
+
+              </div>
+
+
+              {/* STATUS UPDATE */}
+
+              <div className="status-update-section">
+
+                <label
+                  htmlFor={`status-${shipment._id}`}
+                >
+                  Update Shipment Status
+                </label>
+
+
+                <select
+                  id={`status-${shipment._id}`}
+                  value={
+                    shipment.status ||
+                    "Pending"
+                  }
+                  disabled={
+                    updatingTrackingNumber ===
+                    shipment.trackingNumber
+                  }
+                  onChange={(event) =>
+                    handleStatusChange(
+                      shipment.trackingNumber,
+                      event.target.value
+                    )
+                  }
+                >
+
+                  <option value="Pending">
+                    Pending
+                  </option>
+
+                  <option value="Picked Up">
+                    Picked Up
+                  </option>
+
+                  <option value="In Transit">
+                    In Transit
+                  </option>
+
+                  <option value="Out for Delivery">
+                    Out for Delivery
+                  </option>
+
+                  <option value="Delivered">
+                    Delivered
+                  </option>
+
+                </select>
+
+
+                {updatingTrackingNumber ===
+                  shipment.trackingNumber && (
+
+                  <p className="status-updating">
+                    Updating status...
+                  </p>
+
+                )}
+
+              </div>
+
+
+              {/* BUTTON */}
 
               <button
+                className="track-shipment-button"
                 type="button"
-                onClick={() =>
-                  navigate("/send-parcel")
-                }
+                onClick={() => {
+
+                  navigate(
+                    `/home?tracking=${encodeURIComponent(
+                      shipment.trackingNumber
+                    )}`
+                  );
+
+                }}
               >
-                Send a Parcel
+                Track Shipment
               </button>
 
             </div>
 
-          )}
+          ))}
 
-
-        {/* ===================================
-            SHIPMENT LIST
-        =================================== */}
-
-        {!loading &&
-          !error &&
-          shipments.length > 0 && (
-
-            <div className="shipments-list">
-
-              {shipments.map((shipment) => (
-
-                <div
-                  className="shipment-item"
-                  key={shipment._id}
-                >
-
-                  {/* CARD TOP */}
-
-                  <div className="shipment-item-top">
-
-                    <div className="shipment-item-info">
-
-                      <div className="shipment-item-icon">
-                        📦
-                      </div>
-
-                      <div>
-
-                        <h3>
-                          {shipment.trackingNumber}
-                        </h3>
-
-                        <p>
-                          To:{" "}
-                          {shipment.receiverName}
-                        </p>
-
-                      </div>
-
-                    </div>
-
-
-                    {/* STATUS */}
-
-                    <span
-                      className={`shipment-status ${
-                        shipment.status
-                          ?.toLowerCase()
-                          .replace(
-                            /\s+/g,
-                            "-"
-                          )
-                      }`}
-                    >
-                      {shipment.status}
-                    </span>
-
-                  </div>
-
-
-                  {/* CARD DETAILS */}
-
-                  <div className="shipment-item-details">
-
-                    <div className="shipment-detail">
-
-                      <span>
-                        Sender
-                      </span>
-
-                      <strong>
-                        {shipment.senderName}
-                      </strong>
-
-                    </div>
-
-
-                    <div className="shipment-detail">
-
-                      <span>
-                        Receiver
-                      </span>
-
-                      <strong>
-                        {shipment.receiverName}
-                      </strong>
-
-                    </div>
-
-
-                    <div className="shipment-detail">
-
-                      <span>
-                        Parcel Type
-                      </span>
-
-                      <strong>
-                        {shipment.parcelType}
-                      </strong>
-
-                    </div>
-
-
-                    <div className="shipment-detail">
-
-                      <span>
-                        Weight
-                      </span>
-
-                      <strong>
-                        {shipment.weight} kg
-                      </strong>
-
-                    </div>
-
-
-                    <div className="shipment-detail">
-
-                      <span>
-                        Date
-                      </span>
-
-                      <strong>
-                        {formatDate(
-                          shipment.createdAt
-                        )}
-                      </strong>
-
-                    </div>
-
-
-                    <div className="shipment-detail">
-
-                      <span>
-                        Tracking Number
-                      </span>
-
-                      <strong>
-                        {shipment.trackingNumber}
-                      </strong>
-
-                    </div>
-
-                  </div>
-
-
-                  {/* TRACK BUTTON */}
-
-                  <button
-                    type="button"
-                    className="shipment-track-button"
-                    onClick={() =>
-                      handleTrackShipment(
-                        shipment.trackingNumber
-                      )
-                    }
-                  >
-                    Track Shipment
-                  </button>
-
-                </div>
-
-              ))}
-
-            </div>
-
-          )}
+        </div>
 
       </main>
 
 
-      {/* =====================================
-          BOTTOM NAVIGATION
-      ===================================== */}
+      {/* BOTTOM NAVIGATION */}
 
-      <nav className="shipments-bottom-navigation">
-
-        {/* HOME */}
+      <nav className="bottom-navigation">
 
         <button
-          className="shipments-bottom-nav-item"
+          className="bottom-nav-item"
           type="button"
           onClick={() =>
             navigate("/home")
@@ -415,14 +600,9 @@ function Shipments() {
         </button>
 
 
-        {/* SHIPMENTS */}
-
         <button
-          className="shipments-bottom-nav-item active"
+          className="bottom-nav-item active"
           type="button"
-          onClick={() =>
-            navigate("/shipments")
-          }
         >
 
           <span>
@@ -436,10 +616,8 @@ function Shipments() {
         </button>
 
 
-        {/* TRACK */}
-
         <button
-          className="shipments-bottom-nav-item"
+          className="bottom-nav-item"
           type="button"
           onClick={() =>
             navigate("/home")
@@ -457,10 +635,8 @@ function Shipments() {
         </button>
 
 
-        {/* PROFILE */}
-
         <button
-          className="shipments-bottom-nav-item"
+          className="bottom-nav-item"
           type="button"
           onClick={() => {
             alert(
@@ -482,6 +658,7 @@ function Shipments() {
       </nav>
 
     </div>
+
   );
 }
 
