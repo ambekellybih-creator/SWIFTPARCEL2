@@ -10,6 +10,10 @@ function HomeScreen() {
   const [trackingError, setTrackingError] = useState("");
   const [shipment, setShipment] = useState(null);
 
+  // ===============================
+  // TRACK SHIPMENT
+  // ===============================
+
   const handleTrack = async () => {
     const number = trackingNumber.trim();
 
@@ -49,26 +53,22 @@ function HomeScreen() {
       const data = JSON.parse(responseText);
 
       setShipment(data.shipment);
-
     } catch (error) {
       console.error("Tracking error:", error);
 
       setTrackingError(
         error.message || "Unable to track shipment."
       );
-
     } finally {
       setTrackingLoading(false);
     }
   };
-
 
   // ===============================
   // TRACKING TIMELINE
   // ===============================
 
   const getStatusStep = (status) => {
-
     const statuses = [
       "Pending",
       "Picked Up",
@@ -77,18 +77,14 @@ function HomeScreen() {
       "Delivered",
     ];
 
-    const currentIndex =
-      statuses.indexOf(status);
+    const currentIndex = statuses.indexOf(status);
 
     return statuses.map((item, index) => ({
       name: item,
-      completed:
-        currentIndex >= index,
-      current:
-        currentIndex === index,
+      completed: currentIndex >= index,
+      current: currentIndex === index,
     }));
   };
-
 
   return (
     <div className="home-screen">
@@ -98,7 +94,6 @@ function HomeScreen() {
       <header className="home-header">
 
         <div>
-
           <p className="home-greeting">
             Good day 👋
           </p>
@@ -106,7 +101,6 @@ function HomeScreen() {
           <h1>
             Welcome to SwiftParcel
           </h1>
-
         </div>
 
         <button
@@ -146,9 +140,7 @@ function HomeScreen() {
               placeholder="Enter tracking number"
               value={trackingNumber}
               onChange={(event) =>
-                setTrackingNumber(
-                  event.target.value
-                )
+                setTrackingNumber(event.target.value)
               }
               onKeyDown={(event) => {
                 if (event.key === "Enter") {
@@ -246,50 +238,48 @@ function HomeScreen() {
                 Shipment Progress
               </h3>
 
-              {getStatusStep(
-                shipment.status
-              ).map((step, index) => (
+              {getStatusStep(shipment.status).map(
+                (step, index) => (
 
-                <div
-                  className={`timeline-step ${
-                    step.completed
-                      ? "completed"
-                      : ""
-                  } ${
-                    step.current
-                      ? "current"
-                      : ""
-                  }`}
-                  key={step.name}
-                >
+                  <div
+                    className={`timeline-step ${
+                      step.completed
+                        ? "completed"
+                        : ""
+                    } ${
+                      step.current
+                        ? "current"
+                        : ""
+                    }`}
+                    key={step.name}
+                  >
 
-                  <div className="timeline-icon">
+                    <div className="timeline-icon">
+                      {step.completed
+                        ? "✓"
+                        : index + 1}
+                    </div>
 
-                    {step.completed
-                      ? "✓"
-                      : index + 1}
+                    <div className="timeline-content">
+
+                      <strong>
+                        {step.name}
+                      </strong>
+
+                      <p>
+                        {step.current
+                          ? "Your shipment is currently at this stage."
+                          : step.completed
+                          ? "Completed"
+                          : "Not yet reached"}
+                      </p>
+
+                    </div>
 
                   </div>
 
-                  <div className="timeline-content">
-
-                    <strong>
-                      {step.name}
-                    </strong>
-
-                    <p>
-                      {step.current
-                        ? "Your shipment is currently at this stage."
-                        : step.completed
-                        ? "Completed"
-                        : "Not yet reached"}
-                    </p>
-
-                  </div>
-
-                </div>
-
-              ))}
+                )
+              )}
 
             </div>
 
@@ -312,6 +302,8 @@ function HomeScreen() {
         </div>
 
         <div className="quick-actions">
+
+          {/* SEND PARCEL */}
 
           <button
             className="action-card"
@@ -339,6 +331,8 @@ function HomeScreen() {
 
           </button>
 
+
+          {/* TRACK PARCEL */}
 
           <button
             className="action-card"
@@ -387,11 +381,9 @@ function HomeScreen() {
 
           <button
             type="button"
-            onClick={() => {
-              alert(
-                "Recent shipments will be expanded soon."
-              );
-            }}
+            onClick={() =>
+              navigate("/shipments")
+            }
           >
             View all
           </button>
@@ -430,6 +422,8 @@ function HomeScreen() {
 
       <nav className="bottom-navigation">
 
+        {/* HOME */}
+
         <button
           className="bottom-nav-item active"
           type="button"
@@ -442,19 +436,21 @@ function HomeScreen() {
         </button>
 
 
+        {/* SHIPMENTS */}
+
         <button
           className="bottom-nav-item"
           type="button"
-          onClick={() => {
-            alert(
-              "Shipments page will be built soon."
-            );
-          }}
+          onClick={() =>
+            navigate("/shipments")
+          }
         >
           <span>▣</span>
           <small>Shipments</small>
         </button>
 
+
+        {/* TRACK */}
 
         <button
           className="bottom-nav-item"
@@ -471,6 +467,8 @@ function HomeScreen() {
           <small>Track</small>
         </button>
 
+
+        {/* PROFILE */}
 
         <button
           className="bottom-nav-item"

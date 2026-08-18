@@ -15,6 +15,8 @@ import SendParcel from "./pages/SendParcel";
 import Receiver from "./pages/Receiver";
 import ParcelDetails from "./pages/ParcelDetails";
 import ConfirmShipment from "./pages/ConfirmShipment";
+import Shipments from "./pages/Shipments";
+
 
 function App() {
   return (
@@ -75,11 +77,27 @@ function App() {
           element={<ConfirmShipment />}
         />
 
+        {/* Shipments */}
+        <Route
+          path="/shipments"
+          element={<Shipments />}
+        />
+
         {/* Unknown Routes */}
         <Route
           path="*"
-          element={<Navigate to="/" replace />}
+          element={
+            <Navigate
+              to="/"
+              replace
+            />
+          }
         />
+
+        <Route
+  path="/shipments"
+  element={<Shipments />}
+/>
 
       </Routes>
     </BrowserRouter>
