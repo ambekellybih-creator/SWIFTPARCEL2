@@ -106,14 +106,14 @@ app.post(
       ) {
 
         return res.status(400).json({
+
           message:
             "Please provide all required shipment information."
+
         });
 
       }
 
-
-      // Generate tracking number
 
       const trackingNumber =
         "SP" +
@@ -121,8 +121,7 @@ app.post(
           .toString()
           .slice(-8) +
         Math.floor(
-          100 +
-          Math.random() * 900
+          100 + Math.random() * 900
         );
 
 
@@ -147,8 +146,7 @@ app.post(
 
           weight,
 
-          status:
-            "Pending"
+          status: "Pending"
 
         });
 
@@ -165,6 +163,7 @@ app.post(
 
       });
 
+
     } catch (error) {
 
       console.error(
@@ -177,72 +176,6 @@ app.post(
 
         message:
           "Failed to create shipment",
-
-        error:
-          error.message
-
-      });
-
-    }
-
-  }
-);
-
-
-// ==========================================
-// FIND SHIPMENT
-// ==========================================
-
-app.get(
-  "/api/shipments/:trackingNumber",
-  async (req, res) => {
-
-    try {
-
-      const trackingNumber =
-        req.params.trackingNumber.trim();
-
-
-      const shipment =
-        await Shipment.findOne({
-          trackingNumber:
-            trackingNumber
-        });
-
-
-      if (!shipment) {
-
-        return res.status(404).json({
-
-          message:
-            "Shipment not found"
-
-        });
-
-      }
-
-
-      res.status(200).json({
-
-        message:
-          "Shipment found",
-
-        shipment
-
-      });
-
-    } catch (error) {
-
-      console.error(
-        "Tracking error:",
-        error
-      );
-
-
-      res.status(500).json({
-
-        message:
-          "Failed to track shipment",
 
         error:
           error.message
@@ -278,6 +211,7 @@ app.get(
 
       });
 
+
     } catch (error) {
 
       console.error(
@@ -303,10 +237,79 @@ app.get(
 
 
 // ==========================================
+// FIND ONE SHIPMENT
+// ==========================================
+
+app.get(
+  "/api/shipments/:trackingNumber",
+  async (req, res) => {
+
+    try {
+
+      const trackingNumber =
+        req.params.trackingNumber.trim();
+
+
+      const shipment =
+        await Shipment.findOne({
+
+          trackingNumber:
+            trackingNumber
+
+        });
+
+
+      if (!shipment) {
+
+        return res.status(404).json({
+
+          message:
+            "Shipment not found"
+
+        });
+
+      }
+
+
+      res.status(200).json({
+
+        message:
+          "Shipment found",
+
+        shipment
+
+      });
+
+
+    } catch (error) {
+
+      console.error(
+        "Tracking error:",
+        error
+      );
+
+
+      res.status(500).json({
+
+        message:
+          "Failed to track shipment",
+
+        error:
+          error.message
+
+      });
+
+    }
+
+  }
+);
+
+
+// ==========================================
 // UPDATE SHIPMENT STATUS
 // ==========================================
 
-app.patch(
+app.put(
   "/api/shipments/:trackingNumber/status",
   async (req, res) => {
 
@@ -315,11 +318,10 @@ app.patch(
       const trackingNumber =
         req.params.trackingNumber.trim();
 
-      const { status } =
-        req.body;
+      const {
+        status
+      } = req.body;
 
-
-      // Allowed statuses
 
       const allowedStatuses = [
 
@@ -336,34 +338,38 @@ app.patch(
       ];
 
 
-      // Check status
-
       if (
-        !status ||
-        !allowedStatuses.includes(
-          status
-        )
+        !allowedStatuses.includes(status)
       ) {
 
         return res.status(400).json({
 
           message:
-            "Invalid shipment status.",
-
-          allowedStatuses
+            "Invalid shipment status"
 
         });
 
       }
 
 
-      // Find shipment
-
       const shipment =
-        await Shipment.findOne({
-          trackingNumber:
-            trackingNumber
-        });
+        await Shipment.findOneAndUpdate(
+
+          {
+            trackingNumber:
+              trackingNumber
+          },
+
+          {
+            status:
+              status
+          },
+
+          {
+            new: true
+          }
+
+        );
 
 
       if (!shipment) {
@@ -371,20 +377,11 @@ app.patch(
         return res.status(404).json({
 
           message:
-            "Shipment not found."
+            "Shipment not found"
 
         });
 
       }
-
-
-      // Update status
-
-      shipment.status =
-        status;
-
-
-      await shipment.save();
 
 
       res.status(200).json({
@@ -395,6 +392,7 @@ app.patch(
         shipment
 
       });
+
 
     } catch (error) {
 
@@ -407,7 +405,7 @@ app.patch(
       res.status(500).json({
 
         message:
-          "Failed to update shipment status.",
+          "Failed to update shipment status",
 
         error:
           error.message
@@ -461,6 +459,7 @@ app.delete(
           "Shipment deleted successfully!"
 
       });
+
 
     } catch (error) {
 
