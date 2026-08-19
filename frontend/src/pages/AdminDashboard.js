@@ -1,291 +1,561 @@
-import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, {
+  useEffect,
+  useState,
+} from "react";
+
+import {
+  useNavigate,
+} from "react-router-dom";
+
 import "./AdminDashboard.css";
 
+
 function AdminDashboard() {
-  const navigate = useNavigate();
 
-  const [shipments, setShipments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const navigate =
+    useNavigate();
 
-  const [updatingTrackingNumber, setUpdatingTrackingNumber] =
+
+  const [shipments, setShipments] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
     useState("");
+
+  const [
+    updatingTrackingNumber,
+    setUpdatingTrackingNumber,
+  ] = useState("");
+
 
   const apiUrl =
     process.env.REACT_APP_API_URL ||
     "http://localhost:5000";
 
 
-  // ==========================================
-  // CHECK ADMIN LOGIN
-  // ==========================================
+  // ======================================================
+  // GET TOKEN
+  // ======================================================
 
-  useEffect(() => {
-    const isAdmin =
-      localStorage.getItem("swiftparcelAdmin");
+  const getToken = () => {
 
-    if (isAdmin !== "true") {
-      navigate("/admin-login", {
-        replace: true
-      });
-    }
-  }, [navigate]);
-
-
-  // ==========================================
-  // LOAD SHIPMENTS
-  // ==========================================
-
-  const loadShipments = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await fetch(
-        `${apiUrl}/api/shipments`
-      );
-
-      if (!response.ok) {
-        throw new Error(
-          "Failed to load shipments."
-        );
-      }
-
-      const data = await response.json();
-
-      setShipments(
-        data.shipments || []
-      );
-    } catch (error) {
-      console.error(
-        "Load shipments error:",
-        error
-      );
-
-      setError(
-        error.message ||
-        "Unable to load shipments."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-
-  // ==========================================
-  // LOAD SHIPMENTS WHEN PAGE OPENS
-  // ==========================================
-
-  useEffect(() => {
-    const isAdmin =
-      localStorage.getItem("swiftparcelAdmin");
-
-    if (isAdmin === "true") {
-      loadShipments();
-    }
-  }, []);
-
-
-  // ==========================================
-  // LOGOUT
-  // ==========================================
-
-  const handleLogout = () => {
-    localStorage.removeItem(
-      "swiftparcelAdmin"
+    return localStorage.getItem(
+      "swiftparcelAdminToken"
     );
 
-    navigate("/admin-login", {
-      replace: true
-    });
   };
 
 
-  // ==========================================
-  // UPDATE STATUS
-  // ==========================================
+  // ======================================================
+  // CHECK LOGIN
+  // ======================================================
 
-  const handleStatusChange = async (
-    trackingNumber,
-    newStatus
-  ) => {
-    try {
-      setUpdatingTrackingNumber(
-        trackingNumber
-      );
+  useEffect(() => {
 
-      const response = await fetch(
-        `${apiUrl}/api/shipments/${encodeURIComponent(
-          trackingNumber
-        )}/status`,
+    const token =
+      getToken();
+
+
+    if (!token) {
+
+      navigate(
+        "/admin-login",
         {
-          method: "PUT",
-
-          headers: {
-            "Content-Type": "application/json"
-          },
-
-          body: JSON.stringify({
-            status: newStatus
-          })
+          replace: true,
         }
       );
 
-      const data =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-          "Failed to update shipment status."
-        );
-      }
-
-      setShipments(
-        (currentShipments) =>
-          currentShipments.map(
-            (shipment) =>
-              shipment.trackingNumber ===
-              trackingNumber
-                ? {
-                    ...shipment,
-                    status:
-                      data.shipment.status
-                  }
-                : shipment
-          )
-      );
-
-      alert(
-        "Shipment status updated successfully! 👌"
-      );
-    } catch (error) {
-      console.error(
-        "Update status error:",
-        error
-      );
-
-      alert(
-        error.message ||
-        "Failed to update shipment status."
-      );
-    } finally {
-      setUpdatingTrackingNumber("");
-    }
-  };
-
-
-  // ==========================================
-  // DELETE SHIPMENT
-  // ==========================================
-
-  const handleDelete = async (
-    trackingNumber
-  ) => {
-    const confirmDelete =
-      window.confirm(
-        `Are you sure you want to delete shipment ${trackingNumber}?`
-      );
-
-    if (!confirmDelete) {
-      return;
     }
 
-    try {
-      const response =
-        await fetch(
-          `${apiUrl}/api/shipments/${encodeURIComponent(
-            trackingNumber
-          )}`,
+  }, [navigate]);
+
+
+  // ======================================================
+  // LOAD SHIPMENTS
+  // ======================================================
+
+  const loadShipments =
+    async () => {
+
+      const token =
+        getToken();
+
+
+      if (!token) {
+
+        navigate(
+          "/admin-login",
           {
-            method: "DELETE"
+            replace: true,
           }
         );
 
-      const data =
-        await response.json();
+        return;
 
-      if (!response.ok) {
-        throw new Error(
-          data.message ||
-          "Failed to delete shipment."
-        );
       }
 
-      setShipments(
-        (currentShipments) =>
-          currentShipments.filter(
-            (shipment) =>
-              shipment.trackingNumber !==
-              trackingNumber
-          )
-      );
 
-      alert(
-        "Shipment deleted successfully."
-      );
-    } catch (error) {
-      console.error(
-        "Delete shipment error:",
-        error
-      );
+      try {
 
-      alert(
-        error.message ||
-        "Failed to delete shipment."
-      );
+        setLoading(true);
+
+        setError("");
+
+
+        const response =
+          await fetch(
+            `${apiUrl}/api/shipments`,
+            {
+              method:
+                "GET",
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          response.status ===
+          401
+        ) {
+
+          localStorage.removeItem(
+            "swiftparcelAdminToken"
+          );
+
+          localStorage.removeItem(
+            "swiftparcelAdmin"
+          );
+
+          localStorage.removeItem(
+            "swiftparcelAdminUsername"
+          );
+
+
+          navigate(
+            "/admin-login",
+            {
+              replace: true,
+            }
+          );
+
+          return;
+
+        }
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+              "Failed to load shipments."
+          );
+
+        }
+
+
+        setShipments(
+          data.shipments ||
+            []
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Load shipments error:",
+          error
+        );
+
+
+        setError(
+          error.message ||
+            "Unable to load shipments."
+        );
+
+
+      } finally {
+
+        setLoading(false);
+
+      }
+
+    };
+
+
+  // ======================================================
+  // LOAD ON PAGE OPEN
+  // ======================================================
+
+  useEffect(() => {
+
+    const token =
+      getToken();
+
+
+    if (token) {
+
+      loadShipments();
+
     }
-  };
+
+  }, []);
 
 
-  // ==========================================
-  // TRACK SHIPMENT
-  // ==========================================
+  // ======================================================
+  // LOGOUT
+  // ======================================================
 
-  const handleTrack = (
-    trackingNumber
-  ) => {
-    navigate(
-      `/home?tracking=${encodeURIComponent(
-        trackingNumber
-      )}`
-    );
-  };
+  const handleLogout =
+    () => {
+
+      localStorage.removeItem(
+        "swiftparcelAdminToken"
+      );
+
+      localStorage.removeItem(
+        "swiftparcelAdmin"
+      );
+
+      localStorage.removeItem(
+        "swiftparcelAdminUsername"
+      );
 
 
-  // ==========================================
+      navigate(
+        "/admin-login",
+        {
+          replace: true,
+        }
+      );
+
+    };
+
+
+  // ======================================================
+  // UPDATE STATUS
+  // ======================================================
+
+  const handleStatusChange =
+    async (
+      trackingNumber,
+      newStatus
+    ) => {
+
+      const token =
+        getToken();
+
+
+      if (!token) {
+
+        navigate(
+          "/admin-login"
+        );
+
+        return;
+
+      }
+
+
+      try {
+
+        setUpdatingTrackingNumber(
+          trackingNumber
+        );
+
+
+        const response =
+          await fetch(
+            `${apiUrl}/api/shipments/${encodeURIComponent(
+              trackingNumber
+            )}/status`,
+            {
+              method:
+                "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+              },
+
+              body:
+                JSON.stringify({
+                  status:
+                    newStatus,
+                }),
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          response.status ===
+          401
+        ) {
+
+          handleLogout();
+
+          return;
+
+        }
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+              "Failed to update shipment status."
+          );
+
+        }
+
+
+        setShipments(
+          (
+            currentShipments
+          ) =>
+
+            currentShipments.map(
+              (
+                shipment
+              ) =>
+
+                shipment.trackingNumber ===
+                trackingNumber
+
+                  ? {
+                      ...shipment,
+
+                      status:
+                        data
+                          .shipment
+                          .status,
+                    }
+
+                  : shipment
+            )
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Update status error:",
+          error
+        );
+
+
+        alert(
+          error.message ||
+            "Failed to update shipment status."
+        );
+
+
+      } finally {
+
+        setUpdatingTrackingNumber(
+          ""
+        );
+
+      }
+
+    };
+
+
+  // ======================================================
+  // DELETE SHIPMENT
+  // ======================================================
+
+  const handleDelete =
+    async (
+      trackingNumber
+    ) => {
+
+      const confirmed =
+        window.confirm(
+          `Are you sure you want to delete shipment ${trackingNumber}?`
+        );
+
+
+      if (!confirmed) {
+
+        return;
+
+      }
+
+
+      const token =
+        getToken();
+
+
+      if (!token) {
+
+        navigate(
+          "/admin-login"
+        );
+
+        return;
+
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${apiUrl}/api/shipments/${encodeURIComponent(
+              trackingNumber
+            )}`,
+            {
+              method:
+                "DELETE",
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+
+        const data =
+          await response.json();
+
+
+        if (
+          response.status ===
+          401
+        ) {
+
+          handleLogout();
+
+          return;
+
+        }
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+              "Failed to delete shipment."
+          );
+
+        }
+
+
+        setShipments(
+          (
+            currentShipments
+          ) =>
+
+            currentShipments.filter(
+              (
+                shipment
+              ) =>
+                shipment.trackingNumber !==
+                trackingNumber
+            )
+        );
+
+
+        alert(
+          "Shipment deleted successfully."
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Delete shipment error:",
+          error
+        );
+
+
+        alert(
+          error.message ||
+            "Failed to delete shipment."
+        );
+
+      }
+
+    };
+
+
+  // ======================================================
+  // TRACK
+  // ======================================================
+
+  const handleTrack =
+    (
+      trackingNumber
+    ) => {
+
+      navigate(
+        `/home?tracking=${encodeURIComponent(
+          trackingNumber
+        )}`
+      );
+
+    };
+
+
+  // ======================================================
   // STATISTICS
-  // ==========================================
+  // ======================================================
 
   const totalShipments =
     shipments.length;
 
+
   const pendingShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status === "Pending"
+        shipment.status ===
+        "Pending"
     ).length;
+
 
   const inTransitShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status === "In Transit"
+        shipment.status ===
+        "In Transit"
     ).length;
+
 
   const deliveredShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status === "Delivered"
+        shipment.status ===
+        "Delivered"
     ).length;
 
 
-  // ==========================================
+  // ======================================================
   // LOADING
-  // ==========================================
+  // ======================================================
 
   if (loading) {
+
     return (
+
       <div className="admin-dashboard">
 
         <div className="admin-loading">
@@ -305,16 +575,20 @@ function AdminDashboard() {
         </div>
 
       </div>
+
     );
+
   }
 
 
-  // ==========================================
+  // ======================================================
   // ERROR
-  // ==========================================
+  // ======================================================
 
   if (error) {
+
     return (
+
       <div className="admin-dashboard">
 
         <header className="admin-header">
@@ -323,11 +597,14 @@ function AdminDashboard() {
             type="button"
             className="admin-back-button"
             onClick={() =>
-              navigate("/home")
+              navigate(
+                "/home"
+              )
             }
           >
             ←
           </button>
+
 
           <div className="admin-header-title">
 
@@ -341,15 +618,19 @@ function AdminDashboard() {
 
           </div>
 
+
           <button
             type="button"
             className="admin-refresh-button"
-            onClick={loadShipments}
+            onClick={
+              loadShipments
+            }
           >
             ↻
           </button>
 
         </header>
+
 
         <div className="admin-error">
 
@@ -365,9 +646,12 @@ function AdminDashboard() {
             {error}
           </p>
 
+
           <button
             type="button"
-            onClick={loadShipments}
+            onClick={
+              loadShipments
+            }
           >
             Try Again
           </button>
@@ -375,26 +659,33 @@ function AdminDashboard() {
         </div>
 
       </div>
+
     );
+
   }
 
 
-  // ==========================================
+  // ======================================================
   // MAIN DASHBOARD
-  // ==========================================
+  // ======================================================
 
   return (
+
     <div className="admin-dashboard">
+
 
       {/* HEADER */}
 
       <header className="admin-header">
 
+
         <button
           type="button"
           className="admin-back-button"
           onClick={() =>
-            navigate("/home")
+            navigate(
+              "/home"
+            )
           }
         >
           ←
@@ -416,33 +707,39 @@ function AdminDashboard() {
 
         <div className="admin-header-actions">
 
+
           <button
             type="button"
             className="admin-refresh-button"
-            onClick={loadShipments}
-            aria-label="Refresh"
+            onClick={
+              loadShipments
+            }
           >
             ↻
           </button>
 
+
           <button
             type="button"
             className="admin-logout-button"
-            onClick={handleLogout}
+            onClick={
+              handleLogout
+            }
           >
             Logout
           </button>
+
 
         </div>
 
       </header>
 
 
-      {/* MAIN */}
+
+      {/* CONTENT */}
 
       <main className="admin-content">
 
-        {/* WELCOME */}
 
         <section className="admin-welcome">
 
@@ -451,16 +748,19 @@ function AdminDashboard() {
           </h2>
 
           <p>
-            Manage and monitor all SwiftParcel
-            shipments from here.
+            Manage and monitor all
+            SwiftParcel shipments
+            from here.
           </p>
 
         </section>
 
 
+
         {/* STATISTICS */}
 
         <section className="admin-stats">
+
 
           <div className="admin-stat-card">
 
@@ -481,6 +781,7 @@ function AdminDashboard() {
             </div>
 
           </div>
+
 
 
           <div className="admin-stat-card">
@@ -504,6 +805,7 @@ function AdminDashboard() {
           </div>
 
 
+
           <div className="admin-stat-card">
 
             <div className="admin-stat-icon">
@@ -523,6 +825,7 @@ function AdminDashboard() {
             </div>
 
           </div>
+
 
 
           <div className="admin-stat-card">
@@ -545,12 +848,15 @@ function AdminDashboard() {
 
           </div>
 
+
         </section>
 
 
-        {/* SHIPMENTS */}
+
+        {/* ALL SHIPMENTS */}
 
         <section className="admin-shipments-section">
+
 
           <div className="admin-section-heading">
 
@@ -559,11 +865,12 @@ function AdminDashboard() {
             </h2>
 
             <p>
-              Update shipment status or manage
-              individual shipments.
+              Update shipment status
+              or manage shipments.
             </p>
 
           </div>
+
 
 
           {shipments.length === 0 ? (
@@ -579,7 +886,8 @@ function AdminDashboard() {
               </h3>
 
               <p>
-                New shipments will appear here.
+                New shipments will
+                appear here.
               </p>
 
             </div>
@@ -589,33 +897,45 @@ function AdminDashboard() {
             <div className="admin-shipment-list">
 
               {shipments.map(
-                (shipment) => (
+                (
+                  shipment
+                ) => (
 
                   <div
                     className="admin-shipment-card"
-                    key={shipment._id}
+                    key={
+                      shipment._id
+                    }
                   >
+
 
                     {/* TOP */}
 
                     <div className="admin-shipment-top">
 
+
                       <div className="admin-shipment-icon">
                         📦
                       </div>
 
+
                       <div className="admin-shipment-info">
 
                         <h3>
-                          {shipment.trackingNumber}
+                          {
+                            shipment.trackingNumber
+                          }
                         </h3>
 
                         <p>
                           To:{" "}
-                          {shipment.receiverName}
+                          {
+                            shipment.receiverName
+                          }
                         </p>
 
                       </div>
+
 
                       <span
                         className={`admin-status ${
@@ -627,82 +947,119 @@ function AdminDashboard() {
                             )
                         }`}
                       >
-                        {shipment.status}
+                        {
+                          shipment.status
+                        }
                       </span>
 
+
                     </div>
+
 
 
                     {/* DETAILS */}
 
                     <div className="admin-shipment-details">
 
+
                       <div>
+
                         <span>
                           Sender
                         </span>
 
                         <strong>
-                          {shipment.senderName}
+                          {
+                            shipment.senderName
+                          }
                         </strong>
+
                       </div>
 
+
                       <div>
+
                         <span>
                           Receiver
                         </span>
 
                         <strong>
-                          {shipment.receiverName}
+                          {
+                            shipment.receiverName
+                          }
                         </strong>
+
                       </div>
 
+
                       <div>
+
                         <span>
                           Parcel
                         </span>
 
                         <strong>
-                          {shipment.parcelType}
+                          {
+                            shipment.parcelType
+                          }
                         </strong>
+
                       </div>
 
+
                       <div>
+
                         <span>
                           Weight
                         </span>
 
                         <strong>
-                          {shipment.weight} kg
+                          {
+                            shipment.weight
+                          } kg
                         </strong>
+
                       </div>
 
+
                       <div>
+
                         <span>
                           Sender Phone
                         </span>
 
                         <strong>
-                          {shipment.senderPhone}
+                          {
+                            shipment.senderPhone
+                          }
                         </strong>
+
                       </div>
 
+
                       <div>
+
                         <span>
                           Receiver Phone
                         </span>
 
                         <strong>
-                          {shipment.receiverPhone}
+                          {
+                            shipment.receiverPhone
+                          }
                         </strong>
+
                       </div>
 
+
                     </div>
+
 
 
                     {/* ACTIONS */}
 
                     <div className="admin-shipment-actions">
+
 
                       <select
                         value={
@@ -712,7 +1069,9 @@ function AdminDashboard() {
                           updatingTrackingNumber ===
                           shipment.trackingNumber
                         }
-                        onChange={(event) =>
+                        onChange={(
+                          event
+                        ) =>
                           handleStatusChange(
                             shipment.trackingNumber,
                             event.target.value
@@ -743,6 +1102,7 @@ function AdminDashboard() {
                       </select>
 
 
+
                       <button
                         type="button"
                         className="admin-track-button"
@@ -754,6 +1114,7 @@ function AdminDashboard() {
                       >
                         Track
                       </button>
+
 
 
                       <button
@@ -768,7 +1129,9 @@ function AdminDashboard() {
                         Delete
                       </button>
 
+
                     </div>
+
 
                   </div>
 
@@ -779,22 +1142,29 @@ function AdminDashboard() {
 
           )}
 
+
         </section>
 
+
       </main>
+
 
 
       {/* BOTTOM NAVIGATION */}
 
       <nav className="bottom-navigation">
 
+
         <button
           className="bottom-nav-item active"
           type="button"
           onClick={() =>
-            navigate("/admin")
+            navigate(
+              "/admin"
+            )
           }
         >
+
           <span>
             ⌂
           </span>
@@ -802,16 +1172,21 @@ function AdminDashboard() {
           <small>
             Dashboard
           </small>
+
         </button>
+
 
 
         <button
           className="bottom-nav-item"
           type="button"
           onClick={() =>
-            navigate("/shipments")
+            navigate(
+              "/shipments"
+            )
           }
         >
+
           <span>
             ▣
           </span>
@@ -819,16 +1194,21 @@ function AdminDashboard() {
           <small>
             Shipments
           </small>
+
         </button>
+
 
 
         <button
           className="bottom-nav-item"
           type="button"
           onClick={() =>
-            navigate("/home")
+            navigate(
+              "/home"
+            )
           }
         >
+
           <span>
             ⌖
           </span>
@@ -836,16 +1216,21 @@ function AdminDashboard() {
           <small>
             Tracking
           </small>
+
         </button>
+
 
 
         <button
           className="bottom-nav-item"
           type="button"
           onClick={() =>
-            navigate("/home")
+            navigate(
+              "/home"
+            )
           }
         >
+
           <span>
             ◯
           </span>
@@ -853,12 +1238,18 @@ function AdminDashboard() {
           <small>
             Home
           </small>
+
         </button>
+
 
       </nav>
 
+
     </div>
+
   );
+
 }
+
 
 export default AdminDashboard;

@@ -5,31 +5,108 @@ import "./AdminLogin.css";
 function AdminLogin() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [username, setUsername] =
+    useState("");
 
-  const handleLogin = (event) => {
+  const [password, setPassword] =
+    useState("");
+
+  const [error, setError] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const apiUrl =
+    process.env.REACT_APP_API_URL ||
+    "http://localhost:5000";
+
+
+  const handleLogin = async (
+    event
+  ) => {
     event.preventDefault();
 
     setError("");
 
     if (
-      username.trim() === "admin" &&
-      password === "swiftparcel123"
+      !username.trim() ||
+      !password
     ) {
+      setError(
+        "Please enter your username and password."
+      );
+
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const response =
+        await fetch(
+          `${apiUrl}/api/admin/login`,
+          {
+            method: "POST",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+            },
+
+            body: JSON.stringify({
+              username:
+                username.trim(),
+
+              password:
+                password,
+            }),
+          }
+        );
+
+      const data =
+        await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            "Login failed."
+        );
+      }
+
+      localStorage.setItem(
+        "swiftparcelAdminToken",
+        data.token
+      );
+
       localStorage.setItem(
         "swiftparcelAdmin",
         "true"
       );
 
-      navigate("/admin");
-    } else {
-      setError(
-        "Incorrect username or password."
+      localStorage.setItem(
+        "swiftparcelAdminUsername",
+        data.admin.username
       );
+
+      navigate("/admin", {
+        replace: true,
+      });
+    } catch (error) {
+      console.error(
+        "Admin login error:",
+        error
+      );
+
+      setError(
+        error.message ||
+          "Unable to login. Please try again."
+      );
+    } finally {
+      setLoading(false);
     }
   };
+
 
   return (
     <div className="admin-login-screen">
@@ -40,18 +117,21 @@ function AdminLogin() {
           🔐
         </div>
 
-        <h1>Admin Login</h1>
+        <h1>
+          Admin Login
+        </h1>
 
         <p className="admin-login-subtitle">
           Sign in to manage SwiftParcel
         </p>
 
+
         <form
           className="admin-login-form"
-          onSubmit={handleLogin}
+          onSubmit={
+            handleLogin
+          }
         >
-
-          {/* Username */}
 
           <div className="admin-login-group">
 
@@ -64,18 +144,19 @@ function AdminLogin() {
               type="text"
               placeholder="Enter admin username"
               value={username}
-              onChange={(event) => {
+              onChange={(
+                event
+              ) =>
                 setUsername(
                   event.target.value
-                );
-              }}
+                )
+              }
+              disabled={loading}
               required
             />
 
           </div>
 
-
-          {/* Password */}
 
           <div className="admin-login-group">
 
@@ -88,18 +169,19 @@ function AdminLogin() {
               type="password"
               placeholder="Enter admin password"
               value={password}
-              onChange={(event) => {
+              onChange={(
+                event
+              ) =>
                 setPassword(
                   event.target.value
-                );
-              }}
+                )
+              }
+              disabled={loading}
               required
             />
 
           </div>
 
-
-          {/* Error */}
 
           {error && (
             <p className="admin-login-error">
@@ -108,26 +190,26 @@ function AdminLogin() {
           )}
 
 
-          {/* Login Button */}
-
           <button
             type="submit"
             className="admin-login-button"
+            disabled={loading}
           >
-            Login
+            {loading
+              ? "Signing in..."
+              : "Login"}
           </button>
 
         </form>
 
 
-        {/* Back Button */}
-
         <button
           type="button"
           className="admin-login-back"
-          onClick={() => {
-            navigate("/home");
-          }}
+          onClick={() =>
+            navigate("/home")
+          }
+          disabled={loading}
         >
           ← Back to SwiftParcel
         </button>
