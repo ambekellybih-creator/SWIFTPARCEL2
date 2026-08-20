@@ -9,13 +9,8 @@ function Shipments() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [updatingTrackingNumber, setUpdatingTrackingNumber] =
-    useState("");
-
-  const apiUrl =
-    process.env.REACT_APP_API_URL ||
-    "http://localhost:5000";
-
+  // Live Render backend
+  const apiUrl = "https://swiftparcel-api-k6i6.onrender.com";
 
   // ==========================================
   // LOAD SHIPMENTS
@@ -30,17 +25,28 @@ function Shipments() {
         `${apiUrl}/api/shipments`
       );
 
+      const responseText = await response.text();
+
+      console.log("Shipments status:", response.status);
+      console.log("Shipments response:", responseText);
+
       if (!response.ok) {
         throw new Error(
-          "Failed to load shipments."
+          `Server returned ${response.status}: ${responseText}`
         );
       }
 
-      const data = await response.json();
+      let data;
 
-      setShipments(
-        data.shipments || []
-      );
+      try {
+        data = JSON.parse(responseText);
+      } catch (error) {
+        throw new Error(
+          "The server returned an invalid response."
+        );
+      }
+
+      setShipments(data.shipments || []);
 
     } catch (error) {
       console.error(
@@ -49,6 +55,7 @@ function Shipments() {
       );
 
       setError(
+        error.message ||
         "Unable to load shipments."
       );
 
@@ -56,7 +63,6 @@ function Shipments() {
       setLoading(false);
     }
   };
-
 
   // ==========================================
   // LOAD WHEN PAGE OPENS
@@ -66,116 +72,25 @@ function Shipments() {
     loadShipments();
   }, []);
 
-
-  // ==========================================
-  // UPDATE STATUS
-  // ==========================================
-
-  const handleStatusChange = async (
-    trackingNumber,
-    newStatus
-  ) => {
-
-    try {
-
-      setUpdatingTrackingNumber(
-        trackingNumber
-      );
-
-      const response = await fetch(
-        `${apiUrl}/api/shipments/${encodeURIComponent(
-          trackingNumber
-        )}/status`,
-        {
-          method: "PATCH",
-
-          headers: {
-            "Content-Type":
-              "application/json"
-          },
-
-          body: JSON.stringify({
-            status: newStatus
-          })
-        }
-      );
-
-
-      const data =
-        await response.json();
-
-
-      if (!response.ok) {
-
-        throw new Error(
-          data.message ||
-          "Failed to update status."
-        );
-
-      }
-
-
-      // Update shipment on the page
-
-      setShipments((currentShipments) =>
-        currentShipments.map(
-          (shipment) =>
-            shipment.trackingNumber ===
-            trackingNumber
-              ? {
-                  ...shipment,
-                  status:
-                    data.shipment.status
-                }
-              : shipment
-        )
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        "Status update error:",
-        error
-      );
-
-      alert(
-        error.message ||
-        "Unable to update shipment status."
-      );
-
-    } finally {
-
-      setUpdatingTrackingNumber("");
-
-    }
-  };
-
-
   // ==========================================
   // STATUS CLASS
   // ==========================================
 
   const getStatusClass = (status) => {
-
     return (
       status
         ?.toLowerCase()
         .replace(/\s+/g, "-") ||
       "pending"
     );
-
   };
-
 
   // ==========================================
   // LOADING
   // ==========================================
 
   if (loading) {
-
     return (
-
       <div className="shipments-screen">
 
         <header className="shipments-header">
@@ -183,9 +98,7 @@ function Shipments() {
           <button
             className="shipments-back-button"
             type="button"
-            onClick={() =>
-              navigate("/home")
-            }
+            onClick={() => navigate("/home")}
           >
             ←
           </button>
@@ -197,7 +110,6 @@ function Shipments() {
           <div></div>
 
         </header>
-
 
         <main className="shipments-content">
 
@@ -220,19 +132,15 @@ function Shipments() {
         </main>
 
       </div>
-
     );
   }
-
 
   // ==========================================
   // ERROR
   // ==========================================
 
   if (error) {
-
     return (
-
       <div className="shipments-screen">
 
         <header className="shipments-header">
@@ -240,9 +148,7 @@ function Shipments() {
           <button
             className="shipments-back-button"
             type="button"
-            onClick={() =>
-              navigate("/home")
-            }
+            onClick={() => navigate("/home")}
           >
             ←
           </button>
@@ -254,7 +160,6 @@ function Shipments() {
           <div></div>
 
         </header>
-
 
         <main className="shipments-content">
 
@@ -285,19 +190,15 @@ function Shipments() {
         </main>
 
       </div>
-
     );
   }
-
 
   // ==========================================
   // NO SHIPMENTS
   // ==========================================
 
   if (shipments.length === 0) {
-
     return (
-
       <div className="shipments-screen">
 
         <header className="shipments-header">
@@ -305,9 +206,7 @@ function Shipments() {
           <button
             className="shipments-back-button"
             type="button"
-            onClick={() =>
-              navigate("/home")
-            }
+            onClick={() => navigate("/home")}
           >
             ←
           </button>
@@ -319,7 +218,6 @@ function Shipments() {
           <div></div>
 
         </header>
-
 
         <main className="shipments-content">
 
@@ -340,9 +238,7 @@ function Shipments() {
             <button
               className="create-shipment-button"
               type="button"
-              onClick={() =>
-                navigate("/send-parcel")
-              }
+              onClick={() => navigate("/send-parcel")}
             >
               Send a Parcel
             </button>
@@ -352,17 +248,14 @@ function Shipments() {
         </main>
 
       </div>
-
     );
   }
-
 
   // ==========================================
   // SHIPMENTS PAGE
   // ==========================================
 
   return (
-
     <div className="shipments-screen">
 
       {/* HEADER */}
@@ -372,9 +265,7 @@ function Shipments() {
         <button
           className="shipments-back-button"
           type="button"
-          onClick={() =>
-            navigate("/home")
-          }
+          onClick={() => navigate("/home")}
         >
           ←
         </button>
@@ -441,7 +332,7 @@ function Shipments() {
                     shipment.status
                   )}`}
                 >
-                  {shipment.status}
+                  {shipment.status || "Pending"}
                 </span>
 
               </div>
@@ -452,117 +343,57 @@ function Shipments() {
               <div className="shipment-item-details">
 
                 <div>
+
                   <span>
                     Parcel
                   </span>
 
                   <strong>
-                    {shipment.parcelType}
+                    {shipment.parcelType || "N/A"}
                   </strong>
+
                 </div>
 
 
                 <div>
+
                   <span>
                     Weight
                   </span>
 
                   <strong>
-                    {shipment.weight} kg
+                    {shipment.weight || 0} kg
                   </strong>
+
                 </div>
 
 
                 <div>
+
                   <span>
                     Sender
                   </span>
 
                   <strong>
-                    {shipment.senderName}
+                    {shipment.senderName || "N/A"}
                   </strong>
+
                 </div>
 
               </div>
 
 
-              {/* STATUS UPDATE */}
-
-              <div className="status-update-section">
-
-                <label
-                  htmlFor={`status-${shipment._id}`}
-                >
-                  Update Shipment Status
-                </label>
-
-
-                <select
-                  id={`status-${shipment._id}`}
-                  value={
-                    shipment.status ||
-                    "Pending"
-                  }
-                  disabled={
-                    updatingTrackingNumber ===
-                    shipment.trackingNumber
-                  }
-                  onChange={(event) =>
-                    handleStatusChange(
-                      shipment.trackingNumber,
-                      event.target.value
-                    )
-                  }
-                >
-
-                  <option value="Pending">
-                    Pending
-                  </option>
-
-                  <option value="Picked Up">
-                    Picked Up
-                  </option>
-
-                  <option value="In Transit">
-                    In Transit
-                  </option>
-
-                  <option value="Out for Delivery">
-                    Out for Delivery
-                  </option>
-
-                  <option value="Delivered">
-                    Delivered
-                  </option>
-
-                </select>
-
-
-                {updatingTrackingNumber ===
-                  shipment.trackingNumber && (
-
-                  <p className="status-updating">
-                    Updating status...
-                  </p>
-
-                )}
-
-              </div>
-
-
-              {/* BUTTON */}
+              {/* TRACKING */}
 
               <button
                 className="track-shipment-button"
                 type="button"
                 onClick={() => {
-
                   navigate(
                     `/home?tracking=${encodeURIComponent(
                       shipment.trackingNumber
                     )}`
                   );
-
                 }}
               >
                 Track Shipment
@@ -584,9 +415,7 @@ function Shipments() {
         <button
           className="bottom-nav-item"
           type="button"
-          onClick={() =>
-            navigate("/home")
-          }
+          onClick={() => navigate("/home")}
         >
 
           <span>
@@ -619,9 +448,7 @@ function Shipments() {
         <button
           className="bottom-nav-item"
           type="button"
-          onClick={() =>
-            navigate("/home")
-          }
+          onClick={() => navigate("/home")}
         >
 
           <span>
@@ -658,7 +485,6 @@ function Shipments() {
       </nav>
 
     </div>
-
   );
 }
 

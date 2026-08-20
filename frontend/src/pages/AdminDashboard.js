@@ -30,6 +30,9 @@ function AdminDashboard() {
     setUpdatingTrackingNumber,
   ] = useState("");
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+const [statusFilter, setStatusFilter] = useState("All");
 
   const apiUrl =
     process.env.REACT_APP_API_URL ||
@@ -325,32 +328,31 @@ function AdminDashboard() {
 
         }
 
+setShipments(
+  (
+    currentShipments
+  ) =>
 
-        setShipments(
-          (
-            currentShipments
-          ) =>
+    currentShipments.map(
+      (
+        shipment
+      ) =>
 
-            currentShipments.map(
-              (
-                shipment
-              ) =>
+        shipment.trackingNumber ===
+        trackingNumber
 
-                shipment.trackingNumber ===
-                trackingNumber
+          ? {
+              ...shipment,
 
-                  ? {
-                      ...shipment,
+              status:
+                data.shipment
+                  ? data.shipment.status
+                  : newStatus,
+            }
 
-                      status:
-                        data
-                          .shipment
-                          .status,
-                    }
-
-                  : shipment
-            )
-        );
+          : shipment
+    )
+);
 
 
       } catch (error) {
@@ -546,6 +548,57 @@ function AdminDashboard() {
         shipment.status ===
         "Delivered"
     ).length;
+
+    const pickedUpShipments =
+  shipments.filter(
+    (shipment) =>
+      shipment.status ===
+      "Picked Up"
+  ).length;
+
+const outForDeliveryShipments =
+  shipments.filter(
+    (shipment) =>
+      shipment.status ===
+      "Out for Delivery"
+  ).length;
+
+    const filteredShipments =
+  shipments.filter((shipment) => {
+
+    const search =
+      searchTerm.trim().toLowerCase();
+
+    const trackingNumber =
+      shipment.trackingNumber
+        ? shipment.trackingNumber.toLowerCase()
+        : "";
+
+    const senderName =
+      shipment.senderName
+        ? shipment.senderName.toLowerCase()
+        : "";
+
+    const receiverName =
+      shipment.receiverName
+        ? shipment.receiverName.toLowerCase()
+        : "";
+
+    const matchesSearch =
+      search === "" ||
+      trackingNumber.includes(search) ||
+      senderName.includes(search) ||
+      receiverName.includes(search);
+
+    const matchesStatus =
+      statusFilter === "All" ||
+      shipment.status === statusFilter;
+
+    return (
+      matchesSearch &&
+      matchesStatus
+    );
+  });
 
 
   // ======================================================
@@ -848,6 +901,46 @@ function AdminDashboard() {
 
           </div>
 
+<div className="admin-stat-card">
+
+  <div className="admin-stat-icon">
+    📍
+  </div>
+
+  <div>
+
+    <span>
+      Picked Up
+    </span>
+
+    <strong>
+      {pickedUpShipments}
+    </strong>
+
+  </div>
+
+</div>
+
+
+<div className="admin-stat-card">
+
+  <div className="admin-stat-icon">
+    🛵
+  </div>
+
+  <div>
+
+    <span>
+      Out for Delivery
+    </span>
+
+    <strong>
+      {outForDeliveryShipments}
+    </strong>
+
+  </div>
+
+</div>
 
         </section>
 
@@ -871,7 +964,51 @@ function AdminDashboard() {
 
           </div>
 
+<div className="admin-search-filter">
 
+  <input
+    type="text"
+    placeholder="Search tracking number, sender or receiver..."
+    value={searchTerm}
+    onChange={(event) =>
+      setSearchTerm(event.target.value)
+    }
+  />
+
+  <select
+    value={statusFilter}
+    onChange={(event) =>
+      setStatusFilter(event.target.value)
+    }
+  >
+
+    <option value="All">
+      All Statuses
+    </option>
+
+    <option value="Pending">
+      Pending
+    </option>
+
+    <option value="Picked Up">
+      Picked Up
+    </option>
+
+    <option value="In Transit">
+      In Transit
+    </option>
+
+    <option value="Out for Delivery">
+      Out for Delivery
+    </option>
+
+    <option value="Delivered">
+      Delivered
+    </option>
+
+  </select>
+
+</div>
 
           {shipments.length === 0 ? (
 
@@ -896,7 +1033,7 @@ function AdminDashboard() {
 
             <div className="admin-shipment-list">
 
-              {shipments.map(
+              {filteredShipments.map(
                 (
                   shipment
                 ) => (

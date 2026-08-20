@@ -712,3 +712,14 @@
     font-size: 12px;
   }
 }
+
+
+.admin-result-count {
+  margin: -8px 0 18px;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.admin-result-count strong {
+  color: #111827;
+}

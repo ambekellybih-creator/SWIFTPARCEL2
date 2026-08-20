@@ -8,7 +8,6 @@
 }
 
 /* Header */
-
 .confirm-header {
   width: 100%;
   max-width: 850px;
@@ -16,11 +15,9 @@
   margin: 0 auto;
   padding: 0 20px;
   box-sizing: border-box;
-
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   background: #ffffff;
   border-bottom: 1px solid #eeeeee;
 }
@@ -50,14 +47,12 @@
 }
 
 /* Progress */
-
 .parcel-progress {
   width: 100%;
   max-width: 700px;
   margin: 25px auto 0;
   padding: 0 20px;
   box-sizing: border-box;
-
   display: flex;
   align-items: center;
 }
@@ -73,14 +68,11 @@
   width: 28px;
   height: 28px;
   border-radius: 50%;
-
   background: #e4e4ea;
   color: #888888;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 0.7rem;
   font-weight: 600;
 }
@@ -115,7 +107,6 @@
 }
 
 /* Main */
-
 .confirm-content {
   width: calc(100% - 40px);
   max-width: 600px;
@@ -123,7 +114,6 @@
 }
 
 /* Title */
-
 .confirm-title {
   text-align: center;
   margin-bottom: 25px;
@@ -133,15 +123,12 @@
   width: 50px;
   height: 50px;
   margin: 0 auto 12px;
-
   border-radius: 50%;
   background: #4930f5;
   color: #ffffff;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 1.3rem;
   font-weight: 700;
 }
@@ -159,15 +146,12 @@
 }
 
 /* Summary Card */
-
 .summary-card {
   background: #ffffff;
   border-radius: 14px;
   padding: 20px;
   margin-bottom: 14px;
-
   box-sizing: border-box;
-
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
@@ -175,9 +159,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-
   border-bottom: 1px solid #eeeeee;
-
   padding-bottom: 12px;
   margin-bottom: 13px;
 }
@@ -190,20 +172,15 @@
 .summary-header button {
   border: none;
   background: transparent;
-
   color: #4930f5;
-
   font-size: 0.7rem;
   font-weight: 600;
-
   cursor: pointer;
 }
 
 .summary-details p {
   margin: 8px 0;
-
   color: #777777;
-
   font-size: 0.73rem;
   line-height: 1.5;
 }
@@ -213,15 +190,11 @@
 }
 
 /* Delivery Summary */
-
 .delivery-summary {
   background: #f0eeff;
   border-radius: 14px;
-
   padding: 18px 20px;
-
   margin: 18px 0;
-
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -245,28 +218,21 @@
   text-align: right;
 }
 
-/* Confirm */
-
+/* Confirm Button */
 .confirm-button {
   width: 100%;
   height: 48px;
-
   border: none;
   border-radius: 10px;
-
   background: linear-gradient(
     90deg,
     #4c31f5,
     #3725ed
   );
-
   color: #ffffff;
-
   font-size: 0.86rem;
   font-weight: 600;
-
   cursor: pointer;
-
   transition: 0.2s ease;
 }
 
@@ -278,21 +244,20 @@
   transform: scale(0.99);
 }
 
-/* Cancel */
+.confirm-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 
+/* Cancel */
 .cancel-button {
   width: 100%;
   height: 45px;
-
   margin-top: 8px;
-
   border: none;
   background: transparent;
-
   color: #777777;
-
   font-size: 0.78rem;
-
   cursor: pointer;
 }
 
@@ -300,8 +265,68 @@
   color: #4930f5;
 }
 
-/* Tablet */
+/* Error */
+.error-message {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 15px 0;
+  padding: 12px 15px;
+  border-radius: 10px;
+  background: #fff0f0;
+  color: #d32f2f;
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
 
+/* Success */
+.success-message {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 18px 0;
+  padding: 22px;
+  border-radius: 14px;
+  background: #f0fff5;
+  border: 1px solid #c9efd7;
+  text-align: center;
+}
+
+.success-message h3 {
+  margin: 0 0 10px;
+  color: #16803c;
+  font-size: 1rem;
+}
+
+.success-message p {
+  margin: 7px 0;
+  color: #555555;
+  font-size: 0.78rem;
+}
+
+.success-message h2 {
+  margin: 12px 0 18px;
+  color: #4930f5;
+  font-size: 1.35rem;
+  letter-spacing: 1px;
+}
+
+.success-message button {
+  width: 100%;
+  max-width: 250px;
+  height: 44px;
+  border: none;
+  border-radius: 9px;
+  background: #4930f5;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.success-message button:hover {
+  opacity: 0.9;
+}
+
+/* Tablet */
 @media (min-width: 600px) {
   .confirm-content {
     max-width: 650px;
@@ -318,7 +343,6 @@
 }
 
 /* Desktop */
-
 @media (min-width: 1024px) {
   .confirm-content {
     margin-top: 35px;

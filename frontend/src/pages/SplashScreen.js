@@ -7,7 +7,7 @@ function SplashScreen() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      navigate("/onboarding");
+      navigate("/login");
     }, 3000);
 
     return () => clearTimeout(timer);
@@ -16,6 +16,7 @@ function SplashScreen() {
   return (
     <div className="splash-screen">
       <div className="splash-content">
+
         <div className="splash-logo">
           <div className="splash-logo-icon">
             <span>📦</span>
@@ -31,6 +32,7 @@ function SplashScreen() {
         <p className="splash-description">
           Your parcels, your priority.
         </p>
+
       </div>
     </div>
   );

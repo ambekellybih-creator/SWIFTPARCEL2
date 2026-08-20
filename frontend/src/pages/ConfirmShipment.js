@@ -20,15 +20,27 @@ function ConfirmShipment() {
     const savedParcel = localStorage.getItem("swiftparcelParcel");
 
     if (savedSender) {
-      setSender(JSON.parse(savedSender));
+      try {
+        setSender(JSON.parse(savedSender));
+      } catch (error) {
+        console.error("Error loading sender information:", error);
+      }
     }
 
     if (savedReceiver) {
-      setReceiver(JSON.parse(savedReceiver));
+      try {
+        setReceiver(JSON.parse(savedReceiver));
+      } catch (error) {
+        console.error("Error loading receiver information:", error);
+      }
     }
 
     if (savedParcel) {
-      setParcel(JSON.parse(savedParcel));
+      try {
+        setParcel(JSON.parse(savedParcel));
+      } catch (error) {
+        console.error("Error loading parcel information:", error);
+      }
     }
   }, []);
 
@@ -37,9 +49,8 @@ function ConfirmShipment() {
     setError("");
 
     try {
-      const apiUrl =
-        process.env.REACT_APP_API_URL ||
-        "http://localhost:5000";
+      // Live Render backend
+      const apiUrl = "https://swiftparcel-api-k6i6.onrender.com";
 
       const response = await fetch(`${apiUrl}/api/shipments`, {
         method: "POST",
@@ -47,16 +58,20 @@ function ConfirmShipment() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          senderName: sender.fullName,
-          senderPhone: sender.phone,
-          senderAddress: `${sender.address}, ${sender.city}`,
+          senderName: sender.fullName || "",
+          senderPhone: sender.phone || "",
+          senderAddress: `${sender.address || ""}, ${
+            sender.city || ""
+          }`.trim(),
 
-          receiverName: receiver.fullName,
-          receiverPhone: receiver.phone,
-          receiverAddress: `${receiver.address}, ${receiver.city}`,
+          receiverName: receiver.fullName || "",
+          receiverPhone: receiver.phone || "",
+          receiverAddress: `${receiver.address || ""}, ${
+            receiver.city || ""
+          }`.trim(),
 
-          parcelType: parcel.parcelType,
-          weight: Number(parcel.weight),
+          parcelType: parcel.parcelType || "",
+          weight: Number(parcel.weight) || 0,
         }),
       });
 
@@ -71,7 +86,17 @@ function ConfirmShipment() {
         );
       }
 
-      const data = JSON.parse(responseText);
+      let data;
+
+      try {
+        data = JSON.parse(responseText);
+      } catch (error) {
+        throw new Error(
+          "The server returned an invalid response."
+        );
+      }
+
+      console.log("Shipment data:", data);
 
       if (!data.shipment) {
         throw new Error(
@@ -79,22 +104,32 @@ function ConfirmShipment() {
         );
       }
 
-      setTrackingNumber(data.shipment.trackingNumber);
+      const createdShipment = data.shipment;
+
+      setTrackingNumber(
+        createdShipment.trackingNumber || "Not available"
+      );
+
       setSuccess(true);
 
-      // Save the created shipment
+      // Save created shipment
       localStorage.setItem(
         "swiftparcelShipment",
-        JSON.stringify(data.shipment)
+        JSON.stringify(createdShipment)
       );
 
     } catch (error) {
       console.error("Shipment error:", error);
 
-      setError(
-        error.message ||
-          "Unable to create shipment."
-      );
+      if (error.name === "TypeError") {
+        setError(
+          "Unable to connect to the server. Please check your internet connection or try again."
+        );
+      } else {
+        setError(
+          error.message || "Unable to create shipment."
+        );
+      }
     } finally {
       setLoading(false);
     }
@@ -109,7 +144,7 @@ function ConfirmShipment() {
         <button
           type="button"
           className="back-button"
-          onClick={() => navigate("/parcel-details")}
+          onClick={() => navigate("/send-parcel")}
         >
           ←
         </button>
@@ -277,7 +312,7 @@ function ConfirmShipment() {
 
             <button
               type="button"
-              onClick={() => navigate("/parcel-details")}
+              onClick={() => navigate("/send-parcel")}
             >
               Edit
             </button>
@@ -351,13 +386,22 @@ function ConfirmShipment() {
 
             <h3>🎉 Shipment Confirmed!</h3>
 
-            <p>Your shipment has been successfully created.</p>
+            <p>
+              Your shipment has been successfully created.
+            </p>
 
             <p>
               <strong>Tracking Number:</strong>
             </p>
 
             <h2>{trackingNumber}</h2>
+
+            <button
+              type="button"
+              onClick={() => navigate("/shipments")}
+            >
+              View My Shipments
+            </button>
 
           </div>
         )}
