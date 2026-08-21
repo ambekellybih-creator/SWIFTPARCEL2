@@ -1,38 +1,37 @@
 import React, {
+  useCallback,
   useEffect,
   useState,
 } from "react";
 
-import {
-  useNavigate,
-} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import "./AdminDashboard.css";
 
 
+const getAdminToken = () => {
+  return localStorage.getItem(
+    "swiftparcelAdminToken"
+  );
+};
+
+
 function AdminDashboard() {
 
-  const navigate =
-    useNavigate();
+  const navigate = useNavigate();
 
 
-  const [shipments, setShipments] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
+  const [shipments, setShipments] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [
     updatingTrackingNumber,
     setUpdatingTrackingNumber,
   ] = useState("");
-
   const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState("All");
 
-const [statusFilter, setStatusFilter] = useState("All");
 
   const apiUrl =
     process.env.REACT_APP_API_URL ||
@@ -40,36 +39,45 @@ const [statusFilter, setStatusFilter] = useState("All");
 
 
   // ======================================================
-  // GET TOKEN
+  // LOGOUT
   // ======================================================
 
-  const getToken = () => {
+  const handleLogout = useCallback(() => {
 
-    return localStorage.getItem(
+    localStorage.removeItem(
       "swiftparcelAdminToken"
     );
 
-  };
+    localStorage.removeItem(
+      "swiftparcelAdmin"
+    );
+
+    localStorage.removeItem(
+      "swiftparcelAdminUsername"
+    );
+
+
+    navigate("/admin-login", {
+      replace: true,
+    });
+
+  }, [navigate]);
 
 
   // ======================================================
-  // CHECK LOGIN
+  // CHECK ADMIN LOGIN
   // ======================================================
 
   useEffect(() => {
 
-    const token =
-      getToken();
+    const token = getAdminToken();
 
 
     if (!token) {
 
-      navigate(
-        "/admin-login",
-        {
-          replace: true,
-        }
-      );
+      navigate("/admin-login", {
+        replace: true,
+      });
 
     }
 
@@ -80,21 +88,17 @@ const [statusFilter, setStatusFilter] = useState("All");
   // LOAD SHIPMENTS
   // ======================================================
 
-  const loadShipments =
+  const loadShipments = useCallback(
     async () => {
 
-      const token =
-        getToken();
+      const token = getAdminToken();
 
 
       if (!token) {
 
-        navigate(
-          "/admin-login",
-          {
-            replace: true,
-          }
-        );
+        navigate("/admin-login", {
+          replace: true,
+        });
 
         return;
 
@@ -104,53 +108,39 @@ const [statusFilter, setStatusFilter] = useState("All");
       try {
 
         setLoading(true);
-
         setError("");
 
 
-        const response =
-          await fetch(
-            `${apiUrl}/api/shipments`,
-            {
-              method:
-                "GET",
+        const response = await fetch(
+          `${apiUrl}/api/shipments`,
+          {
+            method: "GET",
 
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          );
+            headers: {
+              Authorization:
+                `Bearer ${token}`,
+            },
+          }
+        );
 
 
-        const data =
-          await response.json();
+        let data = {};
 
 
-        if (
-          response.status ===
-          401
-        ) {
+        try {
 
-          localStorage.removeItem(
-            "swiftparcelAdminToken"
-          );
+          data = await response.json();
 
-          localStorage.removeItem(
-            "swiftparcelAdmin"
-          );
+        } catch (jsonError) {
 
-          localStorage.removeItem(
-            "swiftparcelAdminUsername"
-          );
+          data = {};
+
+        }
 
 
-          navigate(
-            "/admin-login",
-            {
-              replace: true,
-            }
-          );
+        if (response.status === 401) {
+
+          handleLogout();
 
           return;
 
@@ -161,29 +151,30 @@ const [statusFilter, setStatusFilter] = useState("All");
 
           throw new Error(
             data.message ||
-              "Failed to load shipments."
+            "Failed to load shipments."
           );
 
         }
 
 
         setShipments(
-          data.shipments ||
-            []
+          Array.isArray(data.shipments)
+            ? data.shipments
+            : []
         );
 
 
-      } catch (error) {
+      } catch (err) {
 
         console.error(
           "Load shipments error:",
-          error
+          err
         );
 
 
         setError(
-          error.message ||
-            "Unable to load shipments."
+          err.message ||
+          "Unable to load shipments."
         );
 
 
@@ -193,17 +184,22 @@ const [statusFilter, setStatusFilter] = useState("All");
 
       }
 
-    };
+    },
+    [
+      apiUrl,
+      handleLogout,
+      navigate,
+    ]
+  );
 
 
   // ======================================================
-  // LOAD ON PAGE OPEN
+  // LOAD SHIPMENTS WHEN PAGE OPENS
   // ======================================================
 
   useEffect(() => {
 
-    const token =
-      getToken();
+    const token = getAdminToken();
 
 
     if (token) {
@@ -212,310 +208,268 @@ const [statusFilter, setStatusFilter] = useState("All");
 
     }
 
-  }, []);
+  }, [loadShipments]);
 
 
   // ======================================================
-  // LOGOUT
+  // UPDATE SHIPMENT STATUS
   // ======================================================
 
-  const handleLogout =
-    () => {
+  const handleStatusChange = async (
+    trackingNumber,
+    newStatus
+  ) => {
 
-      localStorage.removeItem(
-        "swiftparcelAdminToken"
+    const token = getAdminToken();
+
+
+    if (!token) {
+
+      navigate("/admin-login", {
+        replace: true,
+      });
+
+      return;
+
+    }
+
+
+    try {
+
+      setUpdatingTrackingNumber(
+        trackingNumber
       );
 
-      localStorage.removeItem(
-        "swiftparcelAdmin"
-      );
 
-      localStorage.removeItem(
-        "swiftparcelAdminUsername"
-      );
-
-
-      navigate(
-        "/admin-login",
+      const response = await fetch(
+        `${apiUrl}/api/shipments/${encodeURIComponent(
+          trackingNumber
+        )}/status`,
         {
-          replace: true,
+          method: "PUT",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization:
+              `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            status: newStatus,
+          }),
         }
       );
 
-    };
+
+      let data = {};
 
 
-  // ======================================================
-  // UPDATE STATUS
-  // ======================================================
+      try {
 
-  const handleStatusChange =
-    async (
-      trackingNumber,
-      newStatus
-    ) => {
+        data = await response.json();
 
-      const token =
-        getToken();
+      } catch (jsonError) {
+
+        data = {};
+
+      }
 
 
-      if (!token) {
+      if (response.status === 401) {
 
-        navigate(
-          "/admin-login"
-        );
+        handleLogout();
 
         return;
 
       }
 
 
-      try {
+      if (!response.ok) {
 
-        setUpdatingTrackingNumber(
-          trackingNumber
-        );
-
-
-        const response =
-          await fetch(
-            `${apiUrl}/api/shipments/${encodeURIComponent(
-              trackingNumber
-            )}/status`,
-            {
-              method:
-                "PUT",
-
-              headers: {
-                "Content-Type":
-                  "application/json",
-
-                Authorization:
-                  `Bearer ${token}`,
-              },
-
-              body:
-                JSON.stringify({
-                  status:
-                    newStatus,
-                }),
-            }
-          );
-
-
-        const data =
-          await response.json();
-
-
-        if (
-          response.status ===
-          401
-        ) {
-
-          handleLogout();
-
-          return;
-
-        }
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            data.message ||
-              "Failed to update shipment status."
-          );
-
-        }
-
-setShipments(
-  (
-    currentShipments
-  ) =>
-
-    currentShipments.map(
-      (
-        shipment
-      ) =>
-
-        shipment.trackingNumber ===
-        trackingNumber
-
-          ? {
-              ...shipment,
-
-              status:
-                data.shipment
-                  ? data.shipment.status
-                  : newStatus,
-            }
-
-          : shipment
-    )
-);
-
-
-      } catch (error) {
-
-        console.error(
-          "Update status error:",
-          error
-        );
-
-
-        alert(
-          error.message ||
-            "Failed to update shipment status."
-        );
-
-
-      } finally {
-
-        setUpdatingTrackingNumber(
-          ""
+        throw new Error(
+          data.message ||
+          "Failed to update shipment status."
         );
 
       }
 
-    };
+
+      setShipments(
+        (currentShipments) =>
+          currentShipments.map(
+            (shipment) =>
+              shipment.trackingNumber ===
+              trackingNumber
+                ? {
+                    ...shipment,
+
+                    status:
+                      data.shipment?.status ||
+                      newStatus,
+                  }
+                : shipment
+          )
+      );
+
+
+    } catch (err) {
+
+      console.error(
+        "Update status error:",
+        err
+      );
+
+
+      window.alert(
+        err.message ||
+        "Failed to update shipment status."
+      );
+
+
+    } finally {
+
+      setUpdatingTrackingNumber("");
+
+    }
+
+  };
 
 
   // ======================================================
   // DELETE SHIPMENT
   // ======================================================
 
-  const handleDelete =
-    async (
-      trackingNumber
-    ) => {
+  const handleDelete = async (
+    trackingNumber
+  ) => {
 
-      const confirmed =
-        window.confirm(
-          `Are you sure you want to delete shipment ${trackingNumber}?`
-        );
-
-
-      if (!confirmed) {
-
-        return;
-
-      }
+    const confirmed =
+      window.confirm(
+        `Are you sure you want to delete shipment ${trackingNumber}?`
+      );
 
 
-      const token =
-        getToken();
+    if (!confirmed) {
+
+      return;
+
+    }
 
 
-      if (!token) {
+    const token = getAdminToken();
 
-        navigate(
-          "/admin-login"
-        );
 
-        return;
+    if (!token) {
 
-      }
+      navigate("/admin-login", {
+        replace: true,
+      });
+
+      return;
+
+    }
+
+
+    try {
+
+      const response = await fetch(
+        `${apiUrl}/api/shipments/${encodeURIComponent(
+          trackingNumber
+        )}`,
+        {
+          method: "DELETE",
+
+          headers: {
+            Authorization:
+              `Bearer ${token}`,
+          },
+        }
+      );
+
+
+      let data = {};
 
 
       try {
 
-        const response =
-          await fetch(
-            `${apiUrl}/api/shipments/${encodeURIComponent(
-              trackingNumber
-            )}`,
-            {
-              method:
-                "DELETE",
+        data = await response.json();
 
-              headers: {
-                Authorization:
-                  `Bearer ${token}`,
-              },
-            }
-          );
+      } catch (jsonError) {
+
+        data = {};
+
+      }
 
 
-        const data =
-          await response.json();
+      if (response.status === 401) {
+
+        handleLogout();
+
+        return;
+
+      }
 
 
-        if (
-          response.status ===
-          401
-        ) {
+      if (!response.ok) {
 
-          handleLogout();
-
-          return;
-
-        }
-
-
-        if (!response.ok) {
-
-          throw new Error(
-            data.message ||
-              "Failed to delete shipment."
-          );
-
-        }
-
-
-        setShipments(
-          (
-            currentShipments
-          ) =>
-
-            currentShipments.filter(
-              (
-                shipment
-              ) =>
-                shipment.trackingNumber !==
-                trackingNumber
-            )
-        );
-
-
-        alert(
-          "Shipment deleted successfully."
-        );
-
-
-      } catch (error) {
-
-        console.error(
-          "Delete shipment error:",
-          error
-        );
-
-
-        alert(
-          error.message ||
-            "Failed to delete shipment."
+        throw new Error(
+          data.message ||
+          "Failed to delete shipment."
         );
 
       }
 
-    };
 
-
-  // ======================================================
-  // TRACK
-  // ======================================================
-
-  const handleTrack =
-    (
-      trackingNumber
-    ) => {
-
-      navigate(
-        `/home?tracking=${encodeURIComponent(
-          trackingNumber
-        )}`
+      setShipments(
+        (currentShipments) =>
+          currentShipments.filter(
+            (shipment) =>
+              shipment.trackingNumber !==
+              trackingNumber
+          )
       );
 
-    };
+
+      window.alert(
+        "Shipment deleted successfully."
+      );
+
+
+    } catch (err) {
+
+      console.error(
+        "Delete shipment error:",
+        err
+      );
+
+
+      window.alert(
+        err.message ||
+        "Failed to delete shipment."
+      );
+
+    }
+
+  };
+
+
+  // ======================================================
+  // TRACK SHIPMENT
+  // ======================================================
+
+  const handleTrack = (
+    trackingNumber
+  ) => {
+
+    navigate(
+      `/home?tracking=${encodeURIComponent(
+        trackingNumber
+      )}`
+    );
+
+  };
 
 
   // ======================================================
@@ -529,80 +483,124 @@ setShipments(
   const pendingShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status ===
-        "Pending"
+        shipment.status === "Pending"
+    ).length;
+
+
+  const pickedUpShipments =
+    shipments.filter(
+      (shipment) =>
+        shipment.status === "Picked Up"
     ).length;
 
 
   const inTransitShipments =
     shipments.filter(
       (shipment) =>
+        shipment.status === "In Transit"
+    ).length;
+
+
+  const outForDeliveryShipments =
+    shipments.filter(
+      (shipment) =>
         shipment.status ===
-        "In Transit"
+        "Out for Delivery"
     ).length;
 
 
   const deliveredShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status ===
-        "Delivered"
+        shipment.status === "Delivered"
     ).length;
-
-    const pickedUpShipments =
-  shipments.filter(
-    (shipment) =>
-      shipment.status ===
-      "Picked Up"
-  ).length;
-
-const outForDeliveryShipments =
-  shipments.filter(
-    (shipment) =>
-      shipment.status ===
-      "Out for Delivery"
-  ).length;
-
-    const filteredShipments =
-  shipments.filter((shipment) => {
-
-    const search =
-      searchTerm.trim().toLowerCase();
-
-    const trackingNumber =
-      shipment.trackingNumber
-        ? shipment.trackingNumber.toLowerCase()
-        : "";
-
-    const senderName =
-      shipment.senderName
-        ? shipment.senderName.toLowerCase()
-        : "";
-
-    const receiverName =
-      shipment.receiverName
-        ? shipment.receiverName.toLowerCase()
-        : "";
-
-    const matchesSearch =
-      search === "" ||
-      trackingNumber.includes(search) ||
-      senderName.includes(search) ||
-      receiverName.includes(search);
-
-    const matchesStatus =
-      statusFilter === "All" ||
-      shipment.status === statusFilter;
-
-    return (
-      matchesSearch &&
-      matchesStatus
-    );
-  });
 
 
   // ======================================================
-  // LOADING
+  // SEARCH AND FILTER
+  // ======================================================
+
+  const search =
+    searchTerm.trim().toLowerCase();
+
+
+  const filteredShipments =
+    shipments.filter(
+      (shipment) => {
+
+        const trackingNumber =
+          String(
+            shipment.trackingNumber ||
+            ""
+          ).toLowerCase();
+
+
+        const senderName =
+          String(
+            shipment.senderName ||
+            ""
+          ).toLowerCase();
+
+
+        const receiverName =
+          String(
+            shipment.receiverName ||
+            ""
+          ).toLowerCase();
+
+
+        const senderPhone =
+          String(
+            shipment.senderPhone ||
+            ""
+          ).toLowerCase();
+
+
+        const receiverPhone =
+          String(
+            shipment.receiverPhone ||
+            ""
+          ).toLowerCase();
+
+
+        const matchesSearch =
+          search === "" ||
+          trackingNumber.includes(search) ||
+          senderName.includes(search) ||
+          receiverName.includes(search) ||
+          senderPhone.includes(search) ||
+          receiverPhone.includes(search);
+
+
+        const matchesStatus =
+          statusFilter === "All" ||
+          shipment.status ===
+            statusFilter;
+
+
+        return (
+          matchesSearch &&
+          matchesStatus
+        );
+
+      }
+    );
+
+
+  // ======================================================
+  // CLEAR FILTERS
+  // ======================================================
+
+  const clearFilters = () => {
+
+    setSearchTerm("");
+    setStatusFilter("All");
+
+  };
+
+
+  // ======================================================
+  // LOADING SCREEN
   // ======================================================
 
   if (loading) {
@@ -617,9 +615,11 @@ const outForDeliveryShipments =
             📦
           </div>
 
+
           <h2>
             Loading dashboard...
           </h2>
+
 
           <p>
             Please wait.
@@ -635,7 +635,7 @@ const outForDeliveryShipments =
 
 
   // ======================================================
-  // ERROR
+  // ERROR SCREEN
   // ======================================================
 
   if (error) {
@@ -650,9 +650,7 @@ const outForDeliveryShipments =
             type="button"
             className="admin-back-button"
             onClick={() =>
-              navigate(
-                "/home"
-              )
+              navigate("/home")
             }
           >
             ←
@@ -675,9 +673,7 @@ const outForDeliveryShipments =
           <button
             type="button"
             className="admin-refresh-button"
-            onClick={
-              loadShipments
-            }
+            onClick={loadShipments}
           >
             ↻
           </button>
@@ -691,9 +687,11 @@ const outForDeliveryShipments =
             ⚠️
           </div>
 
+
           <h2>
             Unable to load shipments
           </h2>
+
 
           <p>
             {error}
@@ -702,9 +700,7 @@ const outForDeliveryShipments =
 
           <button
             type="button"
-            onClick={
-              loadShipments
-            }
+            onClick={loadShipments}
           >
             Try Again
           </button>
@@ -731,14 +727,11 @@ const outForDeliveryShipments =
 
       <header className="admin-header">
 
-
         <button
           type="button"
           className="admin-back-button"
           onClick={() =>
-            navigate(
-              "/home"
-            )
+            navigate("/home")
           }
         >
           ←
@@ -751,6 +744,7 @@ const outForDeliveryShipments =
             SwiftParcel
           </p>
 
+
           <h1>
             Admin Dashboard
           </h1>
@@ -760,13 +754,10 @@ const outForDeliveryShipments =
 
         <div className="admin-header-actions">
 
-
           <button
             type="button"
             className="admin-refresh-button"
-            onClick={
-              loadShipments
-            }
+            onClick={loadShipments}
           >
             ↻
           </button>
@@ -775,18 +766,14 @@ const outForDeliveryShipments =
           <button
             type="button"
             className="admin-logout-button"
-            onClick={
-              handleLogout
-            }
+            onClick={handleLogout}
           >
             Logout
           </button>
 
-
         </div>
 
       </header>
-
 
 
       {/* CONTENT */}
@@ -794,11 +781,14 @@ const outForDeliveryShipments =
       <main className="admin-content">
 
 
+        {/* WELCOME */}
+
         <section className="admin-welcome">
 
           <h2>
             Welcome, Admin 👋
           </h2>
+
 
           <p>
             Manage and monitor all
@@ -807,7 +797,6 @@ const outForDeliveryShipments =
           </p>
 
         </section>
-
 
 
         {/* STATISTICS */}
@@ -821,11 +810,13 @@ const outForDeliveryShipments =
               📦
             </div>
 
+
             <div>
 
               <span>
                 Total Shipments
               </span>
+
 
               <strong>
                 {totalShipments}
@@ -836,18 +827,19 @@ const outForDeliveryShipments =
           </div>
 
 
-
           <div className="admin-stat-card">
 
             <div className="admin-stat-icon">
               ⏳
             </div>
 
+
             <div>
 
               <span>
                 Pending
               </span>
+
 
               <strong>
                 {pendingShipments}
@@ -858,6 +850,28 @@ const outForDeliveryShipments =
           </div>
 
 
+          <div className="admin-stat-card">
+
+            <div className="admin-stat-icon">
+              📍
+            </div>
+
+
+            <div>
+
+              <span>
+                Picked Up
+              </span>
+
+
+              <strong>
+                {pickedUpShipments}
+              </strong>
+
+            </div>
+
+          </div>
+
 
           <div className="admin-stat-card">
 
@@ -865,11 +879,13 @@ const outForDeliveryShipments =
               🚚
             </div>
 
+
             <div>
 
               <span>
                 In Transit
               </span>
+
 
               <strong>
                 {inTransitShipments}
@@ -880,6 +896,28 @@ const outForDeliveryShipments =
           </div>
 
 
+          <div className="admin-stat-card">
+
+            <div className="admin-stat-icon">
+              🛵
+            </div>
+
+
+            <div>
+
+              <span>
+                Out for Delivery
+              </span>
+
+
+              <strong>
+                {outForDeliveryShipments}
+              </strong>
+
+            </div>
+
+          </div>
+
 
           <div className="admin-stat-card">
 
@@ -887,11 +925,13 @@ const outForDeliveryShipments =
               ✅
             </div>
 
+
             <div>
 
               <span>
                 Delivered
               </span>
+
 
               <strong>
                 {deliveredShipments}
@@ -901,52 +941,11 @@ const outForDeliveryShipments =
 
           </div>
 
-<div className="admin-stat-card">
-
-  <div className="admin-stat-icon">
-    📍
-  </div>
-
-  <div>
-
-    <span>
-      Picked Up
-    </span>
-
-    <strong>
-      {pickedUpShipments}
-    </strong>
-
-  </div>
-
-</div>
-
-
-<div className="admin-stat-card">
-
-  <div className="admin-stat-icon">
-    🛵
-  </div>
-
-  <div>
-
-    <span>
-      Out for Delivery
-    </span>
-
-    <strong>
-      {outForDeliveryShipments}
-    </strong>
-
-  </div>
-
-</div>
 
         </section>
 
 
-
-        {/* ALL SHIPMENTS */}
+        {/* SHIPMENTS */}
 
         <section className="admin-shipments-section">
 
@@ -957,6 +956,7 @@ const outForDeliveryShipments =
               All Shipments
             </h2>
 
+
             <p>
               Update shipment status
               or manage shipments.
@@ -964,51 +964,88 @@ const outForDeliveryShipments =
 
           </div>
 
-<div className="admin-search-filter">
 
-  <input
-    type="text"
-    placeholder="Search tracking number, sender or receiver..."
-    value={searchTerm}
-    onChange={(event) =>
-      setSearchTerm(event.target.value)
-    }
-  />
+          {/* SEARCH */}
 
-  <select
-    value={statusFilter}
-    onChange={(event) =>
-      setStatusFilter(event.target.value)
-    }
-  >
+          <div className="admin-search-filter">
 
-    <option value="All">
-      All Statuses
-    </option>
+            <input
+              type="text"
+              placeholder="Search tracking number, sender or receiver..."
+              value={searchTerm}
+              onChange={(event) =>
+                setSearchTerm(
+                  event.target.value
+                )
+              }
+            />
 
-    <option value="Pending">
-      Pending
-    </option>
 
-    <option value="Picked Up">
-      Picked Up
-    </option>
+            <select
+              value={statusFilter}
+              onChange={(event) =>
+                setStatusFilter(
+                  event.target.value
+                )
+              }
+            >
 
-    <option value="In Transit">
-      In Transit
-    </option>
+              <option value="All">
+                All Statuses
+              </option>
 
-    <option value="Out for Delivery">
-      Out for Delivery
-    </option>
 
-    <option value="Delivered">
-      Delivered
-    </option>
+              <option value="Pending">
+                Pending
+              </option>
 
-  </select>
 
-</div>
+              <option value="Picked Up">
+                Picked Up
+              </option>
+
+
+              <option value="In Transit">
+                In Transit
+              </option>
+
+
+              <option value="Out for Delivery">
+                Out for Delivery
+              </option>
+
+
+              <option value="Delivered">
+                Delivered
+              </option>
+
+            </select>
+
+          </div>
+
+
+          {/* RESULT COUNT */}
+
+          <div className="admin-result-count">
+
+            Showing{" "}
+
+            <strong>
+              {filteredShipments.length}
+            </strong>{" "}
+
+            of{" "}
+
+            <strong>
+              {shipments.length}
+            </strong>{" "}
+
+            shipments
+
+          </div>
+
+
+          {/* NO SHIPMENTS */}
 
           {shipments.length === 0 ? (
 
@@ -1018,14 +1055,45 @@ const outForDeliveryShipments =
                 📦
               </div>
 
+
               <h3>
                 No shipments yet
               </h3>
 
+
               <p>
-                New shipments will
-                appear here.
+                New shipments will appear
+                here.
               </p>
+
+            </div>
+
+          ) : filteredShipments.length === 0 ? (
+
+            <div className="admin-empty">
+
+              <div>
+                🔍
+              </div>
+
+
+              <h3>
+                No matching shipments
+              </h3>
+
+
+              <p>
+                Try another search or
+                status filter.
+              </p>
+
+
+              <button
+                type="button"
+                onClick={clearFilters}
+              >
+                Clear Filters
+              </button>
 
             </div>
 
@@ -1034,257 +1102,260 @@ const outForDeliveryShipments =
             <div className="admin-shipment-list">
 
               {filteredShipments.map(
-                (
-                  shipment
-                ) => (
+                (shipment) => {
 
-                  <div
-                    className="admin-shipment-card"
-                    key={
-                      shipment._id
-                    }
-                  >
+                  const trackingNumber =
+                    shipment.trackingNumber ||
+                    shipment._id;
 
 
-                    {/* TOP */}
+                  const status =
+                    shipment.status ||
+                    "Pending";
 
-                    <div className="admin-shipment-top">
+
+                  const statusClass =
+                    status
+                      .toLowerCase()
+                      .replace(
+                        /\s+/g,
+                        "-"
+                      );
 
 
-                      <div className="admin-shipment-icon">
-                        📦
+                  return (
+
+                    <div
+                      className="admin-shipment-card"
+                      key={
+                        shipment._id ||
+                        trackingNumber
+                      }
+                    >
+
+
+                      {/* TOP */}
+
+                      <div className="admin-shipment-top">
+
+                        <div className="admin-shipment-icon">
+                          📦
+                        </div>
+
+
+                        <div className="admin-shipment-info">
+
+                          <h3>
+                            {trackingNumber}
+                          </h3>
+
+
+                          <p>
+                            To:{" "}
+                            {shipment.receiverName ||
+                              "N/A"}
+                          </p>
+
+                        </div>
+
+
+                        <span
+                          className={`admin-status ${statusClass}`}
+                        >
+                          {status}
+                        </span>
+
                       </div>
 
 
-                      <div className="admin-shipment-info">
+                      {/* DETAILS */}
 
-                        <h3>
-                          {
-                            shipment.trackingNumber
-                          }
-                        </h3>
+                      <div className="admin-shipment-details">
 
-                        <p>
-                          To:{" "}
-                          {
-                            shipment.receiverName
-                          }
-                        </p>
+
+                        <div>
+
+                          <span>
+                            Sender
+                          </span>
+
+
+                          <strong>
+                            {shipment.senderName ||
+                              "N/A"}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Receiver
+                          </span>
+
+
+                          <strong>
+                            {shipment.receiverName ||
+                              "N/A"}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Parcel
+                          </span>
+
+
+                          <strong>
+                            {shipment.parcelType ||
+                              "N/A"}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Weight
+                          </span>
+
+
+                          <strong>
+                            {shipment.weight
+                              ? `${shipment.weight} kg`
+                              : "N/A"}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Sender Phone
+                          </span>
+
+
+                          <strong>
+                            {shipment.senderPhone ||
+                              "N/A"}
+                          </strong>
+
+                        </div>
+
+
+                        <div>
+
+                          <span>
+                            Receiver Phone
+                          </span>
+
+
+                          <strong>
+                            {shipment.receiverPhone ||
+                              "N/A"}
+                          </strong>
+
+                        </div>
+
 
                       </div>
 
 
-                      <span
-                        className={`admin-status ${
-                          shipment.status
-                            ?.toLowerCase()
-                            .replace(
-                              /\s+/g,
-                              "-"
+                      {/* ACTIONS */}
+
+                      <div className="admin-shipment-actions">
+
+
+                        <select
+                          value={status}
+                          disabled={
+                            updatingTrackingNumber ===
+                            trackingNumber
+                          }
+                          onChange={(event) =>
+                            handleStatusChange(
+                              trackingNumber,
+                              event.target.value
                             )
-                        }`}
-                      >
-                        {
-                          shipment.status
-                        }
-                      </span>
-
-
-                    </div>
-
-
-
-                    {/* DETAILS */}
-
-                    <div className="admin-shipment-details">
-
-
-                      <div>
-
-                        <span>
-                          Sender
-                        </span>
-
-                        <strong>
-                          {
-                            shipment.senderName
                           }
-                        </strong>
+                        >
 
-                      </div>
+                          <option value="Pending">
+                            Pending
+                          </option>
 
 
-                      <div>
+                          <option value="Picked Up">
+                            Picked Up
+                          </option>
 
-                        <span>
-                          Receiver
-                        </span>
 
-                        <strong>
-                          {
-                            shipment.receiverName
+                          <option value="In Transit">
+                            In Transit
+                          </option>
+
+
+                          <option value="Out for Delivery">
+                            Out for Delivery
+                          </option>
+
+
+                          <option value="Delivered">
+                            Delivered
+                          </option>
+
+                        </select>
+
+
+                        <button
+                          type="button"
+                          className="admin-track-button"
+                          onClick={() =>
+                            handleTrack(
+                              trackingNumber
+                            )
                           }
-                        </strong>
+                        >
+                          Track
+                        </button>
 
-                      </div>
 
-
-                      <div>
-
-                        <span>
-                          Parcel
-                        </span>
-
-                        <strong>
-                          {
-                            shipment.parcelType
+                        <button
+                          type="button"
+                          className="admin-delete-button"
+                          onClick={() =>
+                            handleDelete(
+                              trackingNumber
+                            )
                           }
-                        </strong>
+                        >
+                          Delete
+                        </button>
 
-                      </div>
-
-
-                      <div>
-
-                        <span>
-                          Weight
-                        </span>
-
-                        <strong>
-                          {
-                            shipment.weight
-                          } kg
-                        </strong>
-
-                      </div>
-
-
-                      <div>
-
-                        <span>
-                          Sender Phone
-                        </span>
-
-                        <strong>
-                          {
-                            shipment.senderPhone
-                          }
-                        </strong>
-
-                      </div>
-
-
-                      <div>
-
-                        <span>
-                          Receiver Phone
-                        </span>
-
-                        <strong>
-                          {
-                            shipment.receiverPhone
-                          }
-                        </strong>
 
                       </div>
 
 
                     </div>
 
+                  );
 
-
-                    {/* ACTIONS */}
-
-                    <div className="admin-shipment-actions">
-
-
-                      <select
-                        value={
-                          shipment.status
-                        }
-                        disabled={
-                          updatingTrackingNumber ===
-                          shipment.trackingNumber
-                        }
-                        onChange={(
-                          event
-                        ) =>
-                          handleStatusChange(
-                            shipment.trackingNumber,
-                            event.target.value
-                          )
-                        }
-                      >
-
-                        <option value="Pending">
-                          Pending
-                        </option>
-
-                        <option value="Picked Up">
-                          Picked Up
-                        </option>
-
-                        <option value="In Transit">
-                          In Transit
-                        </option>
-
-                        <option value="Out for Delivery">
-                          Out for Delivery
-                        </option>
-
-                        <option value="Delivered">
-                          Delivered
-                        </option>
-
-                      </select>
-
-
-
-                      <button
-                        type="button"
-                        className="admin-track-button"
-                        onClick={() =>
-                          handleTrack(
-                            shipment.trackingNumber
-                          )
-                        }
-                      >
-                        Track
-                      </button>
-
-
-
-                      <button
-                        type="button"
-                        className="admin-delete-button"
-                        onClick={() =>
-                          handleDelete(
-                            shipment.trackingNumber
-                          )
-                        }
-                      >
-                        Delete
-                      </button>
-
-
-                    </div>
-
-
-                  </div>
-
-                )
+                }
               )}
 
             </div>
 
           )}
 
-
         </section>
 
-
       </main>
-
 
 
       {/* BOTTOM NAVIGATION */}
@@ -1296,15 +1367,14 @@ const outForDeliveryShipments =
           className="bottom-nav-item active"
           type="button"
           onClick={() =>
-            navigate(
-              "/admin"
-            )
+            navigate("/admin")
           }
         >
 
           <span>
             ⌂
           </span>
+
 
           <small>
             Dashboard
@@ -1313,20 +1383,18 @@ const outForDeliveryShipments =
         </button>
 
 
-
         <button
           className="bottom-nav-item"
           type="button"
           onClick={() =>
-            navigate(
-              "/shipments"
-            )
+            navigate("/shipments")
           }
         >
 
           <span>
             ▣
           </span>
+
 
           <small>
             Shipments
@@ -1335,20 +1403,18 @@ const outForDeliveryShipments =
         </button>
 
 
-
         <button
           className="bottom-nav-item"
           type="button"
           onClick={() =>
-            navigate(
-              "/home"
-            )
+            navigate("/home")
           }
         >
 
           <span>
             ⌖
           </span>
+
 
           <small>
             Tracking
@@ -1357,20 +1423,18 @@ const outForDeliveryShipments =
         </button>
 
 
-
         <button
           className="bottom-nav-item"
           type="button"
           onClick={() =>
-            navigate(
-              "/home"
-            )
+            navigate("/home")
           }
         >
 
           <span>
             ◯
           </span>
+
 
           <small>
             Home
