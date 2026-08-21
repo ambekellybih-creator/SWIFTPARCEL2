@@ -1,96 +1,155 @@
-import React, { useEffect, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useState,
+} from "react";
+
 import { useNavigate } from "react-router-dom";
+
 import "./Shipments.css";
 
+
 function Shipments() {
+
   const navigate = useNavigate();
+
 
   const [shipments, setShipments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+
   // Live Render backend
-  const apiUrl = "https://swiftparcel-api-k6i6.onrender.com";
+  const apiUrl =
+    "https://swiftparcel-api-k6i6.onrender.com";
+
 
   // ==========================================
   // LOAD SHIPMENTS
   // ==========================================
 
-  const loadShipments = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await fetch(
-        `${apiUrl}/api/shipments`
-      );
-
-      const responseText = await response.text();
-
-      console.log("Shipments status:", response.status);
-      console.log("Shipments response:", responseText);
-
-      if (!response.ok) {
-        throw new Error(
-          `Server returned ${response.status}: ${responseText}`
-        );
-      }
-
-      let data;
+  const loadShipments = useCallback(
+    async () => {
 
       try {
-        data = JSON.parse(responseText);
-      } catch (error) {
-        throw new Error(
-          "The server returned an invalid response."
+
+        setLoading(true);
+        setError("");
+
+
+        const response = await fetch(
+          `${apiUrl}/api/shipments`
         );
+
+
+        const responseText =
+          await response.text();
+
+
+        console.log(
+          "Shipments status:",
+          response.status
+        );
+
+
+        console.log(
+          "Shipments response:",
+          responseText
+        );
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            `Server returned ${response.status}: ${responseText}`
+          );
+
+        }
+
+
+        let data;
+
+
+        try {
+
+          data = JSON.parse(
+            responseText
+          );
+
+        } catch (error) {
+
+          throw new Error(
+            "The server returned an invalid response."
+          );
+
+        }
+
+
+        setShipments(
+          data.shipments || []
+        );
+
+
+      } catch (error) {
+
+        console.error(
+          "Loading shipments error:",
+          error
+        );
+
+
+        setError(
+          error.message ||
+          "Unable to load shipments."
+        );
+
+
+      } finally {
+
+        setLoading(false);
+
       }
 
-      setShipments(data.shipments || []);
+    },
+    [apiUrl]
+  );
 
-    } catch (error) {
-      console.error(
-        "Loading shipments error:",
-        error
-      );
-
-      setError(
-        error.message ||
-        "Unable to load shipments."
-      );
-
-    } finally {
-      setLoading(false);
-    }
-  };
 
   // ==========================================
   // LOAD WHEN PAGE OPENS
   // ==========================================
 
   useEffect(() => {
+
     loadShipments();
-  }, []);
+
+  }, [loadShipments]);
+
 
   // ==========================================
   // STATUS CLASS
   // ==========================================
 
   const getStatusClass = (status) => {
+
     return (
       status
         ?.toLowerCase()
         .replace(/\s+/g, "-") ||
       "pending"
     );
+
   };
+
 
   // ==========================================
   // LOADING
   // ==========================================
 
   if (loading) {
+
     return (
+
       <div className="shipments-screen">
 
         <header className="shipments-header">
@@ -103,13 +162,16 @@ function Shipments() {
             ←
           </button>
 
+
           <h1>
             My Shipments
           </h1>
 
+
           <div></div>
 
         </header>
+
 
         <main className="shipments-content">
 
@@ -119,9 +181,11 @@ function Shipments() {
               📦
             </div>
 
+
             <h2>
               Loading shipments...
             </h2>
+
 
             <p>
               Please wait while we load your shipments.
@@ -132,15 +196,20 @@ function Shipments() {
         </main>
 
       </div>
+
     );
+
   }
+
 
   // ==========================================
   // ERROR
   // ==========================================
 
   if (error) {
+
     return (
+
       <div className="shipments-screen">
 
         <header className="shipments-header">
@@ -153,13 +222,16 @@ function Shipments() {
             ←
           </button>
 
+
           <h1>
             My Shipments
           </h1>
 
+
           <div></div>
 
         </header>
+
 
         <main className="shipments-content">
 
@@ -169,13 +241,16 @@ function Shipments() {
               ⚠️
             </div>
 
+
             <h2>
               Something went wrong
             </h2>
 
+
             <p>
               {error}
             </p>
+
 
             <button
               className="try-again-button"
@@ -190,15 +265,20 @@ function Shipments() {
         </main>
 
       </div>
+
     );
+
   }
+
 
   // ==========================================
   // NO SHIPMENTS
   // ==========================================
 
   if (shipments.length === 0) {
+
     return (
+
       <div className="shipments-screen">
 
         <header className="shipments-header">
@@ -211,13 +291,16 @@ function Shipments() {
             ←
           </button>
 
+
           <h1>
             My Shipments
           </h1>
 
+
           <div></div>
 
         </header>
+
 
         <main className="shipments-content">
 
@@ -227,18 +310,23 @@ function Shipments() {
               📦
             </div>
 
+
             <h2>
               No shipments yet
             </h2>
+
 
             <p>
               Your shipments will appear here.
             </p>
 
+
             <button
               className="create-shipment-button"
               type="button"
-              onClick={() => navigate("/send-parcel")}
+              onClick={() =>
+                navigate("/send-parcel")
+              }
             >
               Send a Parcel
             </button>
@@ -248,15 +336,20 @@ function Shipments() {
         </main>
 
       </div>
+
     );
+
   }
+
 
   // ==========================================
   // SHIPMENTS PAGE
   // ==========================================
 
   return (
+
     <div className="shipments-screen">
+
 
       {/* HEADER */}
 
@@ -270,9 +363,11 @@ function Shipments() {
           ←
         </button>
 
+
         <h1>
           My Shipments
         </h1>
+
 
         <div></div>
 
@@ -288,6 +383,7 @@ function Shipments() {
           <h2>
             Your Shipments
           </h2>
+
 
           <p>
             Manage and track your parcels.
@@ -305,6 +401,7 @@ function Shipments() {
               key={shipment._id}
             >
 
+
               {/* TOP */}
 
               <div className="shipment-item-top">
@@ -319,6 +416,7 @@ function Shipments() {
                   <h3>
                     {shipment.trackingNumber}
                   </h3>
+
 
                   <p>
                     To: {shipment.receiverName}
@@ -348,6 +446,7 @@ function Shipments() {
                     Parcel
                   </span>
 
+
                   <strong>
                     {shipment.parcelType || "N/A"}
                   </strong>
@@ -361,6 +460,7 @@ function Shipments() {
                     Weight
                   </span>
 
+
                   <strong>
                     {shipment.weight || 0} kg
                   </strong>
@@ -373,6 +473,7 @@ function Shipments() {
                   <span>
                     Sender
                   </span>
+
 
                   <strong>
                     {shipment.senderName || "N/A"}
@@ -389,11 +490,13 @@ function Shipments() {
                 className="track-shipment-button"
                 type="button"
                 onClick={() => {
+
                   navigate(
                     `/home?tracking=${encodeURIComponent(
                       shipment.trackingNumber
                     )}`
                   );
+
                 }}
               >
                 Track Shipment
@@ -422,6 +525,7 @@ function Shipments() {
             ⌂
           </span>
 
+
           <small>
             Home
           </small>
@@ -437,6 +541,7 @@ function Shipments() {
           <span>
             ▣
           </span>
+
 
           <small>
             Shipments
@@ -455,6 +560,7 @@ function Shipments() {
             ⌖
           </span>
 
+
           <small>
             Track
           </small>
@@ -466,15 +572,18 @@ function Shipments() {
           className="bottom-nav-item"
           type="button"
           onClick={() => {
+
             alert(
               "Profile page will be added soon."
             );
+
           }}
         >
 
           <span>
             ◯
           </span>
+
 
           <small>
             Profile
@@ -485,7 +594,10 @@ function Shipments() {
       </nav>
 
     </div>
+
   );
+
 }
+
 
 export default Shipments;
