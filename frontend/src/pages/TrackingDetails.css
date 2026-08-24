@@ -1,0 +1,349 @@
+.tracking-details-page {
+  min-height: 100vh;
+  background: #f6f7ff;
+  padding-bottom: 40px;
+  color: #111;
+}
+
+.tracking-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 24px;
+  background: #ffffff;
+}
+
+.tracking-header p {
+  margin: 0;
+  color: #3424e9;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.tracking-header h1 {
+  margin: 3px 0 0;
+  font-size: 22px;
+}
+
+.tracking-back-button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  border-radius: 50%;
+  background: #f0f1ff;
+  font-size: 24px;
+  cursor: pointer;
+}
+
+.tracking-number-card {
+  margin: 18px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.06);
+}
+
+.tracking-number-card div {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tracking-number-card span:first-child {
+  color: #777;
+  font-size: 12px;
+}
+
+.tracking-number-card strong {
+  font-size: 18px;
+}
+
+.tracking-status {
+  padding: 8px 13px;
+  border-radius: 20px;
+  background: #e8f9ed;
+  color: #159447;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tracking-status.pending {
+  background: #fff5d9;
+  color: #a36d00;
+}
+
+.tracking-status.picked-up,
+.tracking-status.in-transit {
+  background: #e5f0ff;
+  color: #1769d1;
+}
+
+.tracking-status.out-for-delivery {
+  background: #eee9ff;
+  color: #5a39d6;
+}
+
+.tracking-status.delivered {
+  background: #e8f9ed;
+  color: #159447;
+}
+
+.map-card {
+  margin: 18px;
+  overflow: hidden;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.08);
+}
+
+.map-title {
+  padding: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 15px;
+}
+
+.map-title span {
+  color: #777;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.map-title h2 {
+  margin: 5px 0 0;
+  font-size: 17px;
+}
+
+.live-indicator {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #159447;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.live-indicator span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #159447;
+}
+
+.tracking-map {
+  width: 100%;
+}
+
+.tracking-map .leaflet-container {
+  z-index: 1;
+}
+
+.route-summary {
+  margin: 18px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.06);
+}
+
+.route-location {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.route-location div:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.route-location span {
+  font-size: 10px;
+  color: #888;
+  font-weight: 700;
+}
+
+.route-location strong {
+  font-size: 14px;
+}
+
+.route-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.route-dot.pickup {
+  background: #19a65a;
+}
+
+.route-dot.destination {
+  background: #e43f3f;
+}
+
+.route-line {
+  width: 2px;
+  height: 28px;
+  background: #d5d5d5;
+  margin: 4px 0 4px 5px;
+}
+
+.shipment-info-card,
+.progress-card {
+  margin: 18px;
+  padding: 20px;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.06);
+}
+
+.shipment-info-card h2,
+.progress-card h2 {
+  margin: 0 0 18px;
+  font-size: 18px;
+}
+
+.shipment-info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.shipment-info-grid div {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.shipment-info-grid span {
+  color: #888;
+  font-size: 11px;
+}
+
+.shipment-info-grid strong {
+  font-size: 14px;
+}
+
+.progress-step {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.progress-step:last-child {
+  padding-bottom: 0;
+}
+
+.progress-step:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 15px;
+  top: 32px;
+  width: 2px;
+  height: calc(100% - 15px);
+  background: #ddd;
+}
+
+.progress-step.completed:not(:last-child)::after {
+  background: #3424e9;
+}
+
+.progress-icon {
+  width: 31px;
+  height: 31px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #eeeeee;
+  color: #888;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 2;
+}
+
+.progress-step.completed .progress-icon {
+  background: #3424e9;
+  color: #ffffff;
+}
+
+.progress-step.current .progress-icon {
+  box-shadow: 0 0 0 5px #e8e5ff;
+}
+
+.progress-content strong {
+  font-size: 14px;
+}
+
+.progress-content p {
+  margin: 4px 0 0;
+  color: #888;
+  font-size: 12px;
+}
+
+.tracking-home-button,
+.tracking-primary-button {
+  margin: 18px;
+  width: calc(100% - 36px);
+  padding: 15px;
+  border: none;
+  border-radius: 12px;
+  background: #3424e9;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tracking-loading,
+.tracking-error-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 30px;
+}
+
+.tracking-loading-icon,
+.tracking-error-icon {
+  font-size: 50px;
+  margin-bottom: 15px;
+}
+
+.tracking-loading h2,
+.tracking-error-page h2 {
+  margin: 0;
+}
+
+.tracking-loading p,
+.tracking-error-page p {
+  color: #777;
+}
+
+@media (max-width: 600px) {
+  .tracking-number-card {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .map-title {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .shipment-info-grid {
+    grid-template-columns: 1fr;
+  }
+}
