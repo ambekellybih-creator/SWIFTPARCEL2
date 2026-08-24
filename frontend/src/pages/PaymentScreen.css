@@ -1,0 +1,198 @@
+.payment-screen {
+  min-height: 100vh;
+  background: #f5f7fa;
+  color: #1f2937;
+}
+
+.payment-header {
+  height: 70px;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.payment-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.payment-back-button {
+  width: 42px;
+  height: 42px;
+  border: none;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.payment-header-space {
+  width: 42px;
+}
+
+.payment-content {
+  width: 90%;
+  max-width: 600px;
+  margin: 40px auto;
+}
+
+.payment-title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.payment-icon {
+  width: 60px;
+  height: 60px;
+  margin: 0 auto 15px;
+  border-radius: 50%;
+  background: #dcfce7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+}
+
+.payment-title h2 {
+  margin: 0 0 10px;
+  font-size: 26px;
+}
+
+.payment-title p {
+  margin: 0;
+  color: #6b7280;
+}
+
+.payment-card {
+  background: white;
+  padding: 22px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.payment-card h3 {
+  margin: 0 0 18px;
+  font-size: 18px;
+}
+
+.payment-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.payment-row:last-child {
+  border-bottom: none;
+}
+
+.payment-row span {
+  color: #6b7280;
+}
+
+.payment-method {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 16px;
+  margin-top: 12px;
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.payment-method:hover {
+  border-color: #16a34a;
+}
+
+.method-icon {
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f3f4f6;
+  border-radius: 10px;
+  font-size: 22px;
+}
+
+.payment-method span:last-child {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.payment-method small {
+  color: #6b7280;
+}
+
+.payment-total {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #e5e7eb;
+}
+
+.payment-total span {
+  color: #6b7280;
+  font-size: 16px;
+}
+
+.payment-total strong {
+  font-size: 24px;
+  color: #16a34a;
+}
+
+.pay-button {
+  width: 100%;
+  height: 55px;
+  border: none;
+  border-radius: 10px;
+  background: #16a34a;
+  color: white;
+  font-size: 17px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pay-button:hover {
+  background: #15803d;
+}
+
+.payment-security {
+  text-align: center;
+  color: #6b7280;
+  font-size: 13px;
+  margin-top: 15px;
+}
+
+@media (max-width: 600px) {
+  .payment-header {
+    padding: 0 15px;
+  }
+
+  .payment-content {
+    width: 92%;
+    margin-top: 25px;
+  }
+
+  .payment-title h2 {
+    font-size: 22px;
+  }
+
+  .payment-row {
+    flex-direction: column;
+    gap: 5px;
+  }
+}

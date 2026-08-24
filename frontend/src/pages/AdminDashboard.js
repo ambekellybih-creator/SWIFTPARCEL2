@@ -9,6 +9,10 @@ import { useNavigate } from "react-router-dom";
 import "./AdminDashboard.css";
 
 
+// ======================================================
+// ADMIN TOKEN
+// ======================================================
+
 const getAdminToken = () => {
   return localStorage.getItem(
     "swiftparcelAdminToken"
@@ -16,26 +20,46 @@ const getAdminToken = () => {
 };
 
 
+// ======================================================
+// ADMIN DASHBOARD
+// ======================================================
+
 function AdminDashboard() {
 
   const navigate = useNavigate();
 
 
-  const [shipments, setShipments] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // ======================================================
+  // STATE
+  // ======================================================
+
+  const [shipments, setShipments] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [error, setError] =
+    useState("");
+
   const [
     updatingTrackingNumber,
     setUpdatingTrackingNumber,
   ] = useState("");
-  const [searchTerm, setSearchTerm] = useState("");
+
+  const [searchTerm, setSearchTerm] =
+    useState("");
+
   const [statusFilter, setStatusFilter] =
     useState("All");
 
 
+  // ======================================================
+  // API URL
+  // ======================================================
+
   const apiUrl =
-    process.env.REACT_APP_API_URL ||
-    "http://localhost:5000";
+    "https://swiftparcel-api-k6i6.onrender.com";
 
 
   // ======================================================
@@ -56,30 +80,9 @@ function AdminDashboard() {
       "swiftparcelAdminUsername"
     );
 
-
-    navigate("/admin-login", {
+    navigate("/login", {
       replace: true,
     });
-
-  }, [navigate]);
-
-
-  // ======================================================
-  // CHECK ADMIN LOGIN
-  // ======================================================
-
-  useEffect(() => {
-
-    const token = getAdminToken();
-
-
-    if (!token) {
-
-      navigate("/admin-login", {
-        replace: true,
-      });
-
-    }
 
   }, [navigate]);
 
@@ -91,12 +94,14 @@ function AdminDashboard() {
   const loadShipments = useCallback(
     async () => {
 
-      const token = getAdminToken();
+      const token =
+        getAdminToken();
 
 
+      // No admin token
       if (!token) {
 
-        navigate("/admin-login", {
+        navigate("/login", {
           replace: true,
         });
 
@@ -111,16 +116,33 @@ function AdminDashboard() {
         setError("");
 
 
-        const response = await fetch(
-          `${apiUrl}/api/shipments`,
-          {
-            method: "GET",
+        const response =
+          await fetch(
+            `${apiUrl}/api/shipments`,
+            {
+              method: "GET",
 
-            headers: {
-              Authorization:
-                `Bearer ${token}`,
-            },
-          }
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+
+        const responseText =
+          await response.text();
+
+
+        console.log(
+          "Admin shipments status:",
+          response.status
+        );
+
+
+        console.log(
+          "Admin shipments response:",
+          responseText
         );
 
 
@@ -129,23 +151,46 @@ function AdminDashboard() {
 
         try {
 
-          data = await response.json();
+          data =
+            JSON.parse(
+              responseText
+            );
 
         } catch (jsonError) {
 
-          data = {};
+          throw new Error(
+            "The server returned an invalid response."
+          );
 
         }
 
 
-        if (response.status === 401) {
+        // ==================================================
+        // TOKEN EXPIRED / INVALID
+        // ==================================================
 
-          handleLogout();
+        if (
+          response.status === 401
+        ) {
+
+          localStorage.removeItem(
+            "swiftparcelAdminToken"
+          );
+
+          setError(
+            "Your admin session has expired. Please log in again."
+          );
+
+          setLoading(false);
 
           return;
 
         }
 
+
+        // ==================================================
+        // OTHER SERVER ERROR
+        // ==================================================
 
         if (!response.ok) {
 
@@ -157,8 +202,14 @@ function AdminDashboard() {
         }
 
 
+        // ==================================================
+        // SAVE SHIPMENTS
+        // ==================================================
+
         setShipments(
-          Array.isArray(data.shipments)
+          Array.isArray(
+            data.shipments
+          )
             ? data.shipments
             : []
         );
@@ -177,7 +228,6 @@ function AdminDashboard() {
           "Unable to load shipments."
         );
 
-
       } finally {
 
         setLoading(false);
@@ -185,291 +235,326 @@ function AdminDashboard() {
       }
 
     },
-    [
-      apiUrl,
-      handleLogout,
-      navigate,
-    ]
+    [apiUrl, navigate]
   );
 
 
   // ======================================================
-  // LOAD SHIPMENTS WHEN PAGE OPENS
+  // LOAD SHIPMENTS WHEN DASHBOARD OPENS
   // ======================================================
 
   useEffect(() => {
 
-    const token = getAdminToken();
+    const token =
+      getAdminToken();
 
 
-    if (token) {
+    if (!token) {
 
-      loadShipments();
+      navigate("/login", {
+        replace: true,
+      });
+
+      return;
 
     }
 
-  }, [loadShipments]);
+
+    loadShipments();
+
+  }, [
+    loadShipments,
+    navigate,
+  ]);
 
 
   // ======================================================
   // UPDATE SHIPMENT STATUS
   // ======================================================
 
-  const handleStatusChange = async (
-    trackingNumber,
-    newStatus
-  ) => {
+  const handleStatusChange =
+    async (
+      trackingNumber,
+      newStatus
+    ) => {
 
-    const token = getAdminToken();
-
-
-    if (!token) {
-
-      navigate("/admin-login", {
-        replace: true,
-      });
-
-      return;
-
-    }
+      const token =
+        getAdminToken();
 
 
-    try {
+      if (!token) {
 
-      setUpdatingTrackingNumber(
-        trackingNumber
-      );
-
-
-      const response = await fetch(
-        `${apiUrl}/api/shipments/${encodeURIComponent(
-          trackingNumber
-        )}/status`,
-        {
-          method: "PUT",
-
-          headers: {
-            "Content-Type":
-              "application/json",
-
-            Authorization:
-              `Bearer ${token}`,
-          },
-
-          body: JSON.stringify({
-            status: newStatus,
-          }),
-        }
-      );
-
-
-      let data = {};
-
-
-      try {
-
-        data = await response.json();
-
-      } catch (jsonError) {
-
-        data = {};
-
-      }
-
-
-      if (response.status === 401) {
-
-        handleLogout();
+        navigate("/login", {
+          replace: true,
+        });
 
         return;
 
       }
 
 
-      if (!response.ok) {
+      try {
 
-        throw new Error(
-          data.message ||
+        setUpdatingTrackingNumber(
+          trackingNumber
+        );
+
+
+        const response =
+          await fetch(
+            `${apiUrl}/api/shipments/${encodeURIComponent(
+              trackingNumber
+            )}/status`,
+            {
+              method: "PUT",
+
+              headers: {
+                "Content-Type":
+                  "application/json",
+
+                Authorization:
+                  `Bearer ${token}`,
+              },
+
+              body:
+                JSON.stringify({
+                  status:
+                    newStatus,
+                }),
+            }
+          );
+
+
+        const responseText =
+          await response.text();
+
+
+        let data = {};
+
+
+        try {
+
+          data =
+            JSON.parse(
+              responseText
+            );
+
+        } catch (jsonError) {
+
+          throw new Error(
+            "The server returned an invalid response."
+          );
+
+        }
+
+
+        if (
+          response.status === 401
+        ) {
+
+          handleLogout();
+
+          return;
+
+        }
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            "Failed to update shipment status."
+          );
+
+        }
+
+
+        setShipments(
+          (currentShipments) =>
+            currentShipments.map(
+              (shipment) =>
+                shipment.trackingNumber ===
+                trackingNumber
+                  ? {
+                      ...shipment,
+
+                      status:
+                        data.shipment?.status ||
+                        newStatus,
+                    }
+                  : shipment
+            )
+        );
+
+
+      } catch (err) {
+
+        console.error(
+          "Update status error:",
+          err
+        );
+
+
+        window.alert(
+          err.message ||
           "Failed to update shipment status."
         );
 
+      } finally {
+
+        setUpdatingTrackingNumber("");
+
       }
 
-
-      setShipments(
-        (currentShipments) =>
-          currentShipments.map(
-            (shipment) =>
-              shipment.trackingNumber ===
-              trackingNumber
-                ? {
-                    ...shipment,
-
-                    status:
-                      data.shipment?.status ||
-                      newStatus,
-                  }
-                : shipment
-          )
-      );
-
-
-    } catch (err) {
-
-      console.error(
-        "Update status error:",
-        err
-      );
-
-
-      window.alert(
-        err.message ||
-        "Failed to update shipment status."
-      );
-
-
-    } finally {
-
-      setUpdatingTrackingNumber("");
-
-    }
-
-  };
+    };
 
 
   // ======================================================
   // DELETE SHIPMENT
   // ======================================================
 
-  const handleDelete = async (
-    trackingNumber
-  ) => {
+  const handleDelete =
+    async (
+      trackingNumber
+    ) => {
 
-    const confirmed =
-      window.confirm(
-        `Are you sure you want to delete shipment ${trackingNumber}?`
-      );
-
-
-    if (!confirmed) {
-
-      return;
-
-    }
+      const confirmed =
+        window.confirm(
+          `Are you sure you want to delete shipment ${trackingNumber}?`
+        );
 
 
-    const token = getAdminToken();
-
-
-    if (!token) {
-
-      navigate("/admin-login", {
-        replace: true,
-      });
-
-      return;
-
-    }
-
-
-    try {
-
-      const response = await fetch(
-        `${apiUrl}/api/shipments/${encodeURIComponent(
-          trackingNumber
-        )}`,
-        {
-          method: "DELETE",
-
-          headers: {
-            Authorization:
-              `Bearer ${token}`,
-          },
-        }
-      );
-
-
-      let data = {};
-
-
-      try {
-
-        data = await response.json();
-
-      } catch (jsonError) {
-
-        data = {};
-
-      }
-
-
-      if (response.status === 401) {
-
-        handleLogout();
+      if (!confirmed) {
 
         return;
 
       }
 
 
-      if (!response.ok) {
+      const token =
+        getAdminToken();
 
-        throw new Error(
-          data.message ||
+
+      if (!token) {
+
+        navigate("/login", {
+          replace: true,
+        });
+
+        return;
+
+      }
+
+
+      try {
+
+        const response =
+          await fetch(
+            `${apiUrl}/api/shipments/${encodeURIComponent(
+              trackingNumber
+            )}`,
+            {
+              method: "DELETE",
+
+              headers: {
+                Authorization:
+                  `Bearer ${token}`,
+              },
+            }
+          );
+
+
+        const responseText =
+          await response.text();
+
+
+        let data = {};
+
+
+        try {
+
+          data =
+            JSON.parse(
+              responseText
+            );
+
+        } catch (jsonError) {
+
+          throw new Error(
+            "The server returned an invalid response."
+          );
+
+        }
+
+
+        if (
+          response.status === 401
+        ) {
+
+          handleLogout();
+
+          return;
+
+        }
+
+
+        if (!response.ok) {
+
+          throw new Error(
+            data.message ||
+            "Failed to delete shipment."
+          );
+
+        }
+
+
+        setShipments(
+          (currentShipments) =>
+            currentShipments.filter(
+              (shipment) =>
+                shipment.trackingNumber !==
+                trackingNumber
+            )
+        );
+
+
+        window.alert(
+          "Shipment deleted successfully."
+        );
+
+
+      } catch (err) {
+
+        console.error(
+          "Delete shipment error:",
+          err
+        );
+
+
+        window.alert(
+          err.message ||
           "Failed to delete shipment."
         );
 
       }
 
-
-      setShipments(
-        (currentShipments) =>
-          currentShipments.filter(
-            (shipment) =>
-              shipment.trackingNumber !==
-              trackingNumber
-          )
-      );
-
-
-      window.alert(
-        "Shipment deleted successfully."
-      );
-
-
-    } catch (err) {
-
-      console.error(
-        "Delete shipment error:",
-        err
-      );
-
-
-      window.alert(
-        err.message ||
-        "Failed to delete shipment."
-      );
-
-    }
-
-  };
+    };
 
 
   // ======================================================
   // TRACK SHIPMENT
   // ======================================================
 
-  const handleTrack = (
-    trackingNumber
-  ) => {
+  const handleTrack =
+    (trackingNumber) => {
 
-    navigate(
-      `/home?tracking=${encodeURIComponent(
-        trackingNumber
-      )}`
-    );
+      navigate(
+        `/home?tracking=${encodeURIComponent(
+          trackingNumber
+        )}`
+      );
 
-  };
+    };
 
 
   // ======================================================
@@ -483,21 +568,24 @@ function AdminDashboard() {
   const pendingShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status === "Pending"
+        shipment.status ===
+        "Pending"
     ).length;
 
 
   const pickedUpShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status === "Picked Up"
+        shipment.status ===
+        "Picked Up"
     ).length;
 
 
   const inTransitShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status === "In Transit"
+        shipment.status ===
+        "In Transit"
     ).length;
 
 
@@ -512,16 +600,19 @@ function AdminDashboard() {
   const deliveredShipments =
     shipments.filter(
       (shipment) =>
-        shipment.status === "Delivered"
+        shipment.status ===
+        "Delivered"
     ).length;
 
 
   // ======================================================
-  // SEARCH AND FILTER
+  // SEARCH
   // ======================================================
 
   const search =
-    searchTerm.trim().toLowerCase();
+    searchTerm
+      .trim()
+      .toLowerCase();
 
 
   const filteredShipments =
@@ -565,11 +656,21 @@ function AdminDashboard() {
 
         const matchesSearch =
           search === "" ||
-          trackingNumber.includes(search) ||
-          senderName.includes(search) ||
-          receiverName.includes(search) ||
-          senderPhone.includes(search) ||
-          receiverPhone.includes(search);
+          trackingNumber.includes(
+            search
+          ) ||
+          senderName.includes(
+            search
+          ) ||
+          receiverName.includes(
+            search
+          ) ||
+          senderPhone.includes(
+            search
+          ) ||
+          receiverPhone.includes(
+            search
+          );
 
 
         const matchesStatus =
@@ -600,7 +701,7 @@ function AdminDashboard() {
 
 
   // ======================================================
-  // LOADING SCREEN
+  // LOADING
   // ======================================================
 
   if (loading) {
@@ -615,11 +716,9 @@ function AdminDashboard() {
             📦
           </div>
 
-
           <h2>
             Loading dashboard...
           </h2>
-
 
           <p>
             Please wait.
@@ -635,7 +734,7 @@ function AdminDashboard() {
 
 
   // ======================================================
-  // ERROR SCREEN
+  // ERROR
   // ======================================================
 
   if (error) {
@@ -705,6 +804,16 @@ function AdminDashboard() {
             Try Again
           </button>
 
+
+          <button
+            type="button"
+            onClick={() =>
+              handleLogout()
+            }
+          >
+            Login Again
+          </button>
+
         </div>
 
       </div>
@@ -744,7 +853,6 @@ function AdminDashboard() {
             SwiftParcel
           </p>
 
-
           <h1>
             Admin Dashboard
           </h1>
@@ -776,7 +884,7 @@ function AdminDashboard() {
       </header>
 
 
-      {/* CONTENT */}
+      {/* MAIN CONTENT */}
 
       <main className="admin-content">
 
@@ -788,7 +896,6 @@ function AdminDashboard() {
           <h2>
             Welcome, Admin 👋
           </h2>
-
 
           <p>
             Manage and monitor all
@@ -810,13 +917,11 @@ function AdminDashboard() {
               📦
             </div>
 
-
             <div>
 
               <span>
                 Total Shipments
               </span>
-
 
               <strong>
                 {totalShipments}
@@ -833,13 +938,11 @@ function AdminDashboard() {
               ⏳
             </div>
 
-
             <div>
 
               <span>
                 Pending
               </span>
-
 
               <strong>
                 {pendingShipments}
@@ -856,13 +959,11 @@ function AdminDashboard() {
               📍
             </div>
 
-
             <div>
 
               <span>
                 Picked Up
               </span>
-
 
               <strong>
                 {pickedUpShipments}
@@ -879,13 +980,11 @@ function AdminDashboard() {
               🚚
             </div>
 
-
             <div>
 
               <span>
                 In Transit
               </span>
-
 
               <strong>
                 {inTransitShipments}
@@ -902,13 +1001,11 @@ function AdminDashboard() {
               🛵
             </div>
 
-
             <div>
 
               <span>
                 Out for Delivery
               </span>
-
 
               <strong>
                 {outForDeliveryShipments}
@@ -925,13 +1022,11 @@ function AdminDashboard() {
               ✅
             </div>
 
-
             <div>
 
               <span>
                 Delivered
               </span>
-
 
               <strong>
                 {deliveredShipments}
@@ -955,7 +1050,6 @@ function AdminDashboard() {
             <h2>
               All Shipments
             </h2>
-
 
             <p>
               Update shipment status
@@ -994,26 +1088,21 @@ function AdminDashboard() {
                 All Statuses
               </option>
 
-
               <option value="Pending">
                 Pending
               </option>
-
 
               <option value="Picked Up">
                 Picked Up
               </option>
 
-
               <option value="In Transit">
                 In Transit
               </option>
 
-
               <option value="Out for Delivery">
                 Out for Delivery
               </option>
-
 
               <option value="Delivered">
                 Delivered
@@ -1055,11 +1144,9 @@ function AdminDashboard() {
                 📦
               </div>
 
-
               <h3>
                 No shipments yet
               </h3>
-
 
               <p>
                 New shipments will appear
@@ -1076,17 +1163,14 @@ function AdminDashboard() {
                 🔍
               </div>
 
-
               <h3>
                 No matching shipments
               </h3>
-
 
               <p>
                 Try another search or
                 status filter.
               </p>
-
 
               <button
                 type="button"
@@ -1149,7 +1233,6 @@ function AdminDashboard() {
                             {trackingNumber}
                           </h3>
 
-
                           <p>
                             To:{" "}
                             {shipment.receiverName ||
@@ -1179,7 +1262,6 @@ function AdminDashboard() {
                             Sender
                           </span>
 
-
                           <strong>
                             {shipment.senderName ||
                               "N/A"}
@@ -1193,7 +1275,6 @@ function AdminDashboard() {
                           <span>
                             Receiver
                           </span>
-
 
                           <strong>
                             {shipment.receiverName ||
@@ -1209,7 +1290,6 @@ function AdminDashboard() {
                             Parcel
                           </span>
 
-
                           <strong>
                             {shipment.parcelType ||
                               "N/A"}
@@ -1223,7 +1303,6 @@ function AdminDashboard() {
                           <span>
                             Weight
                           </span>
-
 
                           <strong>
                             {shipment.weight
@@ -1240,7 +1319,6 @@ function AdminDashboard() {
                             Sender Phone
                           </span>
 
-
                           <strong>
                             {shipment.senderPhone ||
                               "N/A"}
@@ -1254,7 +1332,6 @@ function AdminDashboard() {
                           <span>
                             Receiver Phone
                           </span>
-
 
                           <strong>
                             {shipment.receiverPhone ||
@@ -1290,21 +1367,17 @@ function AdminDashboard() {
                             Pending
                           </option>
 
-
                           <option value="Picked Up">
                             Picked Up
                           </option>
-
 
                           <option value="In Transit">
                             In Transit
                           </option>
 
-
                           <option value="Out for Delivery">
                             Out for Delivery
                           </option>
-
 
                           <option value="Delivered">
                             Delivered
@@ -1375,7 +1448,6 @@ function AdminDashboard() {
             ⌂
           </span>
 
-
           <small>
             Dashboard
           </small>
@@ -1394,7 +1466,6 @@ function AdminDashboard() {
           <span>
             ▣
           </span>
-
 
           <small>
             Shipments
@@ -1415,7 +1486,6 @@ function AdminDashboard() {
             ⌖
           </span>
 
-
           <small>
             Tracking
           </small>
@@ -1435,7 +1505,6 @@ function AdminDashboard() {
             ◯
           </span>
 
-
           <small>
             Home
           </small>
@@ -1444,7 +1513,6 @@ function AdminDashboard() {
 
 
       </nav>
-
 
     </div>
 

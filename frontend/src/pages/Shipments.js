@@ -19,13 +19,16 @@ function Shipments() {
   const [error, setError] = useState("");
 
 
-  // Live Render backend
+  // ==========================================
+  // LIVE BACKEND
+  // ==========================================
+
   const apiUrl =
     "https://swiftparcel-api-k6i6.onrender.com";
 
 
   // ==========================================
-  // LOAD SHIPMENTS
+  // LOAD CUSTOMER SHIPMENTS
   // ==========================================
 
   const loadShipments = useCallback(
@@ -37,8 +40,55 @@ function Shipments() {
         setError("");
 
 
+        // ==========================================
+        // GET CUSTOMER TOKEN
+        // ==========================================
+
+        const customerToken =
+          localStorage.getItem(
+            "swiftparcelCustomerToken"
+          ) ||
+          localStorage.getItem(
+            "swiftparcelToken"
+          );
+
+
+        console.log(
+          "Customer token found:",
+          !!customerToken
+        );
+
+
+        // ==========================================
+        // CHECK LOGIN
+        // ==========================================
+
+        if (!customerToken) {
+
+          throw new Error(
+            "You are not logged in. Please login again."
+          );
+
+        }
+
+
+        // ==========================================
+        // GET CUSTOMER SHIPMENTS
+        // ==========================================
+
         const response = await fetch(
-          `${apiUrl}/api/shipments`
+          `${apiUrl}/api/my-shipments`,
+          {
+            method: "GET",
+
+            headers: {
+              "Content-Type":
+                "application/json",
+
+              Authorization:
+                `Bearer ${customerToken}`,
+            },
+          }
         );
 
 
@@ -58,6 +108,10 @@ function Shipments() {
         );
 
 
+        // ==========================================
+        // SERVER ERROR
+        // ==========================================
+
         if (!response.ok) {
 
           throw new Error(
@@ -67,14 +121,18 @@ function Shipments() {
         }
 
 
-        let data;
+        // ==========================================
+        // PARSE RESPONSE
+        // ==========================================
 
+        let data;
 
         try {
 
-          data = JSON.parse(
-            responseText
-          );
+          data =
+            JSON.parse(
+              responseText
+            );
 
         } catch (error) {
 
@@ -84,6 +142,16 @@ function Shipments() {
 
         }
 
+
+        console.log(
+          "Customer shipments:",
+          data
+        );
+
+
+        // ==========================================
+        // SAVE SHIPMENTS
+        // ==========================================
 
         setShipments(
           data.shipments || []
@@ -130,7 +198,9 @@ function Shipments() {
   // STATUS CLASS
   // ==========================================
 
-  const getStatusClass = (status) => {
+  const getStatusClass = (
+    status
+  ) => {
 
     return (
       status
@@ -157,7 +227,9 @@ function Shipments() {
           <button
             className="shipments-back-button"
             type="button"
-            onClick={() => navigate("/home")}
+            onClick={() =>
+              navigate("/home")
+            }
           >
             ←
           </button>
@@ -188,7 +260,8 @@ function Shipments() {
 
 
             <p>
-              Please wait while we load your shipments.
+              Please wait while we load
+              your shipments.
             </p>
 
           </div>
@@ -217,7 +290,9 @@ function Shipments() {
           <button
             className="shipments-back-button"
             type="button"
-            onClick={() => navigate("/home")}
+            onClick={() =>
+              navigate("/home")
+            }
           >
             ←
           </button>
@@ -275,7 +350,9 @@ function Shipments() {
   // NO SHIPMENTS
   // ==========================================
 
-  if (shipments.length === 0) {
+  if (
+    shipments.length === 0
+  ) {
 
     return (
 
@@ -286,7 +363,9 @@ function Shipments() {
           <button
             className="shipments-back-button"
             type="button"
-            onClick={() => navigate("/home")}
+            onClick={() =>
+              navigate("/home")
+            }
           >
             ←
           </button>
@@ -325,7 +404,9 @@ function Shipments() {
               className="create-shipment-button"
               type="button"
               onClick={() =>
-                navigate("/send-parcel")
+                navigate(
+                  "/send-parcel"
+                )
               }
             >
               Send a Parcel
@@ -358,7 +439,9 @@ function Shipments() {
         <button
           className="shipments-back-button"
           type="button"
-          onClick={() => navigate("/home")}
+          onClick={() =>
+            navigate("/home")
+          }
         >
           ←
         </button>
@@ -394,117 +477,137 @@ function Shipments() {
 
         <div className="shipments-list">
 
-          {shipments.map((shipment) => (
+          {shipments.map(
+            (shipment) => (
 
-            <div
-              className="shipment-item"
-              key={shipment._id}
-            >
-
-
-              {/* TOP */}
-
-              <div className="shipment-item-top">
-
-                <div className="shipment-item-icon">
-                  📦
-                </div>
-
-
-                <div className="shipment-item-info">
-
-                  <h3>
-                    {shipment.trackingNumber}
-                  </h3>
-
-
-                  <p>
-                    To: {shipment.receiverName}
-                  </p>
-
-                </div>
-
-
-                <span
-                  className={`shipment-status ${getStatusClass(
-                    shipment.status
-                  )}`}
-                >
-                  {shipment.status || "Pending"}
-                </span>
-
-              </div>
-
-
-              {/* DETAILS */}
-
-              <div className="shipment-item-details">
-
-                <div>
-
-                  <span>
-                    Parcel
-                  </span>
-
-
-                  <strong>
-                    {shipment.parcelType || "N/A"}
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    Weight
-                  </span>
-
-
-                  <strong>
-                    {shipment.weight || 0} kg
-                  </strong>
-
-                </div>
-
-
-                <div>
-
-                  <span>
-                    Sender
-                  </span>
-
-
-                  <strong>
-                    {shipment.senderName || "N/A"}
-                  </strong>
-
-                </div>
-
-              </div>
-
-
-              {/* TRACKING */}
-
-              <button
-                className="track-shipment-button"
-                type="button"
-                onClick={() => {
-
-                  navigate(
-                    `/home?tracking=${encodeURIComponent(
-                      shipment.trackingNumber
-                    )}`
-                  );
-
-                }}
+              <div
+                className="shipment-item"
+                key={shipment._id}
               >
-                Track Shipment
-              </button>
 
-            </div>
 
-          ))}
+                {/* TOP */}
+
+                <div className="shipment-item-top">
+
+                  <div className="shipment-item-icon">
+                    📦
+                  </div>
+
+
+                  <div className="shipment-item-info">
+
+                    <h3>
+                      {
+                        shipment.trackingNumber
+                      }
+                    </h3>
+
+
+                    <p>
+                      To:{" "}
+                      {
+                        shipment.receiverName
+                      }
+                    </p>
+
+                  </div>
+
+
+                  <span
+                    className={`shipment-status ${getStatusClass(
+                      shipment.status
+                    )}`}
+                  >
+                    {
+                      shipment.status ||
+                      "Pending"
+                    }
+                  </span>
+
+                </div>
+
+
+                {/* DETAILS */}
+
+                <div className="shipment-item-details">
+
+                  <div>
+
+                    <span>
+                      Parcel
+                    </span>
+
+
+                    <strong>
+                      {
+                        shipment.parcelType ||
+                        "N/A"
+                      }
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Weight
+                    </span>
+
+
+                    <strong>
+                      {
+                        shipment.weight ||
+                        0
+                      }{" "}
+                      kg
+                    </strong>
+
+                  </div>
+
+
+                  <div>
+
+                    <span>
+                      Sender
+                    </span>
+
+
+                    <strong>
+                      {
+                        shipment.senderName ||
+                        "N/A"
+                      }
+                    </strong>
+
+                  </div>
+
+                </div>
+
+
+                {/* TRACKING */}
+
+                <button
+                  className="track-shipment-button"
+                  type="button"
+                  onClick={() => {
+
+                    navigate(
+                      `/home?tracking=${encodeURIComponent(
+                        shipment.trackingNumber
+                      )}`
+                    );
+
+                  }}
+                >
+                  Track Shipment
+                </button>
+
+              </div>
+
+            )
+          )}
 
         </div>
 
@@ -518,7 +621,9 @@ function Shipments() {
         <button
           className="bottom-nav-item"
           type="button"
-          onClick={() => navigate("/home")}
+          onClick={() =>
+            navigate("/home")
+          }
         >
 
           <span>
@@ -553,7 +658,9 @@ function Shipments() {
         <button
           className="bottom-nav-item"
           type="button"
-          onClick={() => navigate("/home")}
+          onClick={() =>
+            navigate("/home")
+          }
         >
 
           <span>

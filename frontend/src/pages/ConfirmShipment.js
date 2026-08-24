@@ -9,11 +9,6 @@ function ConfirmShipment() {
   const [receiver, setReceiver] = useState({});
   const [parcel, setParcel] = useState({});
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [trackingNumber, setTrackingNumber] = useState("");
-
   useEffect(() => {
     const savedSender = localStorage.getItem("swiftparcelSender");
     const savedReceiver = localStorage.getItem("swiftparcelReceiver");
@@ -44,95 +39,19 @@ function ConfirmShipment() {
     }
   }, []);
 
-  const handleConfirm = async () => {
-    setLoading(true);
-    setError("");
+  const handleContinueToPayment = () => {
+    const shipmentDetails = {
+      sender,
+      receiver,
+      parcel,
+    };
 
-    try {
-      // Live Render backend
-      const apiUrl = "https://swiftparcel-api-k6i6.onrender.com";
+    localStorage.setItem(
+      "swiftparcelPendingShipment",
+      JSON.stringify(shipmentDetails)
+    );
 
-      const response = await fetch(`${apiUrl}/api/shipments`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          senderName: sender.fullName || "",
-          senderPhone: sender.phone || "",
-          senderAddress: `${sender.address || ""}, ${
-            sender.city || ""
-          }`.trim(),
-
-          receiverName: receiver.fullName || "",
-          receiverPhone: receiver.phone || "",
-          receiverAddress: `${receiver.address || ""}, ${
-            receiver.city || ""
-          }`.trim(),
-
-          parcelType: parcel.parcelType || "",
-          weight: Number(parcel.weight) || 0,
-        }),
-      });
-
-      const responseText = await response.text();
-
-      console.log("Backend status:", response.status);
-      console.log("Backend response:", responseText);
-
-      if (!response.ok) {
-        throw new Error(
-          `Server returned ${response.status}: ${responseText}`
-        );
-      }
-
-      let data;
-
-      try {
-        data = JSON.parse(responseText);
-      } catch (error) {
-        throw new Error(
-          "The server returned an invalid response."
-        );
-      }
-
-      console.log("Shipment data:", data);
-
-      if (!data.shipment) {
-        throw new Error(
-          "The server did not return shipment information."
-        );
-      }
-
-      const createdShipment = data.shipment;
-
-      setTrackingNumber(
-        createdShipment.trackingNumber || "Not available"
-      );
-
-      setSuccess(true);
-
-      // Save created shipment
-      localStorage.setItem(
-        "swiftparcelShipment",
-        JSON.stringify(createdShipment)
-      );
-
-    } catch (error) {
-      console.error("Shipment error:", error);
-
-      if (error.name === "TypeError") {
-        setError(
-          "Unable to connect to the server. Please check your internet connection or try again."
-        );
-      } else {
-        setError(
-          error.message || "Unable to create shipment."
-        );
-      }
-    } finally {
-      setLoading(false);
-    }
+    navigate("/payment");
   };
 
   return (
@@ -201,7 +120,7 @@ function ConfirmShipment() {
 
           <p>
             Please check your information before
-            confirming your shipment.
+            continuing to payment.
           </p>
 
         </div>
@@ -372,67 +291,24 @@ function ConfirmShipment() {
         </section>
 
 
-        {/* Error */}
-        {error && (
-          <div className="error-message">
-            {error}
-          </div>
-        )}
-
-
-        {/* Success */}
-        {success && (
-          <div className="success-message">
-
-            <h3>🎉 Shipment Confirmed!</h3>
-
-            <p>
-              Your shipment has been successfully created.
-            </p>
-
-            <p>
-              <strong>Tracking Number:</strong>
-            </p>
-
-            <h2>{trackingNumber}</h2>
-
-            <button
-              type="button"
-              onClick={() => navigate("/shipments")}
-            >
-              View My Shipments
-            </button>
-
-          </div>
-        )}
-
-
-        {/* Confirm Button */}
-        {!success && (
-          <button
-            type="button"
-            className="confirm-button"
-            onClick={handleConfirm}
-            disabled={loading}
-          >
-            {loading
-              ? "Confirming Shipment..."
-              : "Confirm Shipment"}
-          </button>
-        )}
+        {/* Continue to Payment */}
+        <button
+          type="button"
+          className="confirm-button"
+          onClick={handleContinueToPayment}
+        >
+          Continue to Payment
+        </button>
 
 
         {/* Cancel */}
-        {!success && (
-          <button
-            type="button"
-            className="cancel-button"
-            onClick={() => navigate("/home")}
-            disabled={loading}
-          >
-            Cancel
-          </button>
-        )}
+        <button
+          type="button"
+          className="cancel-button"
+          onClick={() => navigate("/home")}
+        >
+          Cancel
+        </button>
 
       </main>
 

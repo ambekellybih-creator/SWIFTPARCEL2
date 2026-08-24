@@ -9,20 +9,38 @@ function SignUpScreen() {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] =
+    useState(false);
+
+  const [acceptedTerms, setAcceptedTerms] =
+    useState(false);
+
+  const [loading, setLoading] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  // ==========================================
+  // BACKEND
+  // ==========================================
 
   const apiUrl =
-    process.env.REACT_APP_API_URL ||
     "https://swiftparcel-api-k6i6.onrender.com";
+
+  // ==========================================
+  // SIGN UP
+  // ==========================================
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     setError("");
+
+    // ==========================================
+    // TERMS
+    // ==========================================
 
     if (!acceptedTerms) {
       setError(
@@ -31,6 +49,10 @@ function SignUpScreen() {
       return;
     }
 
+    // ==========================================
+    // PASSWORD
+    // ==========================================
+
     if (password.length < 6) {
       setError(
         "Password must be at least 6 characters."
@@ -38,8 +60,12 @@ function SignUpScreen() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      setLoading(true);
+      console.log(
+        "SIGNUP STARTED"
+      );
 
       const response = await fetch(
         `${apiUrl}/api/auth/signup`,
@@ -51,57 +77,131 @@ function SignUpScreen() {
           },
 
           body: JSON.stringify({
-            fullName,
-            email,
-            phone,
-            password,
+            fullName:
+              fullName.trim(),
+
+            email:
+              email.trim().toLowerCase(),
+
+            phone:
+              phone.trim(),
+
+            password:
+              password,
           }),
         }
       );
 
-      const data =
-        await response.json();
+      const responseText =
+        await response.text();
 
       console.log(
-        "Signup response:",
-        data
+        "SIGNUP STATUS:",
+        response.status
       );
+
+      console.log(
+        "SIGNUP RESPONSE:",
+        responseText
+      );
+
+      let data = {};
+
+      try {
+        data = JSON.parse(
+          responseText
+        );
+      } catch (error) {
+        throw new Error(
+          responseText ||
+            "The server returned an invalid response."
+        );
+      }
+
+      // ==========================================
+      // SERVER ERROR
+      // ==========================================
 
       if (!response.ok) {
         throw new Error(
           data.message ||
-          "Failed to create account."
+            "Unable to create account."
         );
       }
 
-      // Save customer authentication token
+      // ==========================================
+      // TOKEN CHECK
+      // ==========================================
+
+      if (!data.token) {
+        throw new Error(
+          "Account was created, but no login token was returned."
+        );
+      }
+
+      // ==========================================
+      // CUSTOMER TOKEN
+      // ==========================================
+
+      localStorage.setItem(
+        "swiftparcelCustomerToken",
+        data.token
+      );
+
       localStorage.setItem(
         "swiftparcelToken",
         data.token
       );
 
-      // Save customer information
-      localStorage.setItem(
-        "swiftparcelUser",
-        JSON.stringify(data.user)
+      // ==========================================
+      // CUSTOMER INFORMATION
+      // ==========================================
+
+      if (data.user) {
+        localStorage.setItem(
+          "swiftparcelCustomer",
+          JSON.stringify(data.user)
+        );
+
+        localStorage.setItem(
+          "swiftparcelUser",
+          JSON.stringify(data.user)
+        );
+      }
+
+      // ==========================================
+      // REMOVE ADMIN AUTHENTICATION
+      // ==========================================
+
+      localStorage.removeItem(
+        "swiftparcelAdminToken"
       );
 
-      alert(
-        "Account created successfully!"
+      localStorage.removeItem(
+        "swiftparcelAdmin"
       );
 
-      // Go to Home
-      navigate("/home");
+      console.log(
+        "ACCOUNT CREATED SUCCESSFULLY"
+      );
+
+      // ==========================================
+      // GO HOME
+      // ==========================================
+
+      navigate("/home", {
+        replace: true,
+      });
 
     } catch (error) {
       console.error(
-        "Signup error:",
+        "SIGNUP ERROR:",
         error
       );
 
       setError(
         error.message ||
-        "Unable to create your account."
+          "Unable to create your account."
       );
 
     } finally {
@@ -109,12 +209,17 @@ function SignUpScreen() {
     }
   };
 
+  // ==========================================
+  // PAGE
+  // ==========================================
+
   return (
     <div className="signup-screen">
 
       <div className="signup-container">
 
-        {/* Logo */}
+        {/* LOGO */}
+
         <div className="signup-logo">
 
           <div className="signup-logo-icon">
@@ -128,7 +233,8 @@ function SignUpScreen() {
         </div>
 
 
-        {/* Heading */}
+        {/* HEADING */}
+
         <div className="signup-heading">
 
           <h1>
@@ -143,21 +249,36 @@ function SignUpScreen() {
         </div>
 
 
-        {/* Error */}
+        {/* ERROR */}
+
         {error && (
-          <div className="signup-error">
+          <div
+            className="signup-error"
+            style={{
+              display: "block",
+              color: "#b91c1c",
+              backgroundColor: "#fee2e2",
+              border: "1px solid #fca5a5",
+              padding: "12px",
+              marginBottom: "15px",
+              borderRadius: "8px",
+              lineHeight: "1.5",
+            }}
+          >
             {error}
           </div>
         )}
 
 
-        {/* Form */}
+        {/* FORM */}
+
         <form
           onSubmit={handleSubmit}
           className="signup-form"
         >
 
-          {/* Full Name */}
+          {/* FULL NAME */}
+
           <div className="signup-form-group">
 
             <label htmlFor="fullName">
@@ -181,7 +302,8 @@ function SignUpScreen() {
           </div>
 
 
-          {/* Email */}
+          {/* EMAIL */}
+
           <div className="signup-form-group">
 
             <label htmlFor="email">
@@ -205,7 +327,8 @@ function SignUpScreen() {
           </div>
 
 
-          {/* Phone */}
+          {/* PHONE */}
+
           <div className="signup-form-group">
 
             <label htmlFor="phone">
@@ -237,7 +360,8 @@ function SignUpScreen() {
           </div>
 
 
-          {/* Password */}
+          {/* PASSWORD */}
+
           <div className="signup-form-group">
 
             <label htmlFor="signupPassword">
@@ -270,7 +394,8 @@ function SignUpScreen() {
                 className="signup-password-toggle"
                 onClick={() =>
                   setShowPassword(
-                    !showPassword
+                    (previous) =>
+                      !previous
                   )
                 }
                 disabled={loading}
@@ -285,7 +410,8 @@ function SignUpScreen() {
           </div>
 
 
-          {/* Terms */}
+          {/* TERMS */}
+
           <div className="terms-container">
 
             <input
@@ -321,23 +447,23 @@ function SignUpScreen() {
           </div>
 
 
-          {/* Create Account */}
+          {/* CREATE ACCOUNT */}
+
           <button
             type="submit"
             className="create-account-button"
             disabled={loading}
           >
-
             {loading
               ? "Creating Account..."
               : "Create Account"}
-
           </button>
 
         </form>
 
 
-        {/* Login */}
+        {/* LOGIN */}
+
         <p className="already-account">
 
           Already have an account?{" "}

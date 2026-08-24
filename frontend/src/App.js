@@ -1,115 +1,92 @@
 import React from "react";
-import {
-  BrowserRouter,
-  Routes,
-  Route,
-} from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import SplashScreen from "./pages/SplashScreen";
 import LoginScreen from "./pages/LoginScreen";
 import SignUpScreen from "./pages/SignUpScreen";
 import HomeScreen from "./pages/HomeScreen";
+import SendParcel from "./pages/SendParcel";
+import Receiver from "./pages/Receiver";
 import ParcelDetails from "./pages/ParcelDetails";
 import ConfirmShipment from "./pages/ConfirmShipment";
+import PaymentScreen from "./pages/PaymentScreen";
 import Shipments from "./pages/Shipments";
-import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 
-
 function App() {
-
   return (
-
     <BrowserRouter>
-
       <Routes>
 
-        {/* SPLASH */}
+        {/* Splash Screen */}
         <Route
           path="/"
-          element={
-            <SplashScreen />
-          }
+          element={<SplashScreen />}
         />
 
-
-        {/* LOGIN */}
+        {/* Login */}
         <Route
           path="/login"
-          element={
-            <LoginScreen />
-          }
+          element={<LoginScreen />}
         />
 
-
-        {/* SIGN UP */}
+        {/* Sign Up */}
         <Route
           path="/signup"
-          element={
-            <SignUpScreen />
-          }
+          element={<SignUpScreen />}
         />
 
-
-        {/* HOME */}
+        {/* Customer Home */}
         <Route
           path="/home"
-          element={
-            <HomeScreen />
-          }
+          element={<HomeScreen />}
         />
 
-
-        {/* SEND PARCEL */}
+        {/* Send Parcel */}
         <Route
           path="/send-parcel"
-          element={
-            <ParcelDetails />
-          }
+          element={<SendParcel />}
         />
 
+        {/* Receiver */}
+        <Route
+          path="/receiver"
+          element={<Receiver />}
+        />
 
-        {/* CONFIRM SHIPMENT */}
+        {/* Parcel Details */}
+        <Route
+          path="/parcel-details"
+          element={<ParcelDetails />}
+        />
+
+        {/* Confirm Shipment */}
         <Route
           path="/confirm-shipment"
-          element={
-            <ConfirmShipment />
-          }
+          element={<ConfirmShipment />}
         />
 
+        {/* Payment */}
+        <Route
+          path="/payment"
+          element={<PaymentScreen />}
+        />
 
-        {/* SHIPMENTS */}
+        {/* Customer Shipments */}
         <Route
           path="/shipments"
-          element={
-            <Shipments />
-          }
+          element={<Shipments />}
         />
 
-
-        {/* ADMIN LOGIN */}
-        <Route
-          path="/admin-login"
-          element={
-            <AdminLogin />
-          }
-        />
-
-
-        {/* ADMIN DASHBOARD */}
+        {/* Admin Dashboard */}
         <Route
           path="/admin"
-          element={
-            <AdminDashboard />
-          }
+          element={<AdminDashboard />}
         />
 
       </Routes>
-
     </BrowserRouter>
-
   );
-
 }
 
 export default App;
