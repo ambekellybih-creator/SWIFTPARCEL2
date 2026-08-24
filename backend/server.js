@@ -1,3 +1,4 @@
+
 const dns = require("dns");
 
 dns.setServers([
@@ -16,6 +17,8 @@ const Shipment = require("./models/Shipment");
 const Admin = require("./models/Admin");
 const User = require("./models/User");
 
+
+
 dotenv.config();
 
 const app = express();
@@ -28,10 +31,26 @@ const JWT_SECRET =
 
 
 // ======================================================
+// FIXED ADMIN LOGIN
+// ======================================================
+
+const ADMIN_EMAIL =
+  "adminswift@gmail.com";
+
+const ADMIN_PASSWORD =
+  "swiftparcel123";
+
+
+// ======================================================
 // MIDDLEWARE
 // ======================================================
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 
 app.use(express.json());
 
@@ -67,7 +86,7 @@ mongoose
   .catch((error) => {
     console.error(
       "MongoDB connection error:",
-      error
+      error.message
     );
   });
 
@@ -85,7 +104,7 @@ app.get("/", (req, res) => {
 
 
 // ======================================================
-// CUSTOMER SIGN UP
+// NORMAL CUSTOMER SIGN UP
 // ======================================================
 
 app.post(
@@ -176,21 +195,30 @@ app.post(
           {
             userId:
               user._id,
+
             email:
               user.email,
+
+            role:
+              "customer",
           },
+
           JWT_SECRET,
+
           {
             expiresIn:
               "7d",
           }
         );
 
-      res.status(201).json({
+      return res.status(201).json({
         message:
           "Account created successfully.",
 
         token,
+
+        role:
+          "customer",
 
         user: {
           id:
@@ -213,7 +241,7 @@ app.post(
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Failed to create account.",
 
@@ -226,7 +254,7 @@ app.post(
 
 
 // ======================================================
-// CUSTOMER LOGIN
+// NORMAL LOGIN + ADMIN LOGIN
 // ======================================================
 
 app.post(
@@ -251,22 +279,88 @@ app.post(
       const loginValue =
         emailOrPhone.trim();
 
+
+// ======================================================
+// CHECK ADMIN FIRST
+// ======================================================
+
+      if (
+        loginValue.toLowerCase() ===
+          ADMIN_EMAIL &&
+        password ===
+          ADMIN_PASSWORD
+      ) {
+
+        const adminToken =
+          jwt.sign(
+            {
+              adminId:
+                "swiftparcel-admin",
+
+              email:
+                ADMIN_EMAIL,
+
+              role:
+                "admin",
+            },
+
+            JWT_SECRET,
+
+            {
+              expiresIn:
+                "24h",
+            }
+          );
+
+        console.log(
+          "Admin login successful."
+        );
+
+        return res.status(200).json({
+          message:
+            "Admin login successful.",
+
+          token:
+            adminToken,
+
+          role:
+            "admin",
+
+          admin: {
+            email:
+              ADMIN_EMAIL,
+
+            role:
+              "admin",
+          },
+        });
+      }
+
+
+// ======================================================
+// CUSTOMER LOGIN
+// ======================================================
+
       let user;
 
       if (
         loginValue.includes("@")
       ) {
+
         user =
           await User.findOne({
             email:
               loginValue.toLowerCase(),
           });
+
       } else {
+
         user =
           await User.findOne({
             phone:
               loginValue,
           });
+
       }
 
       if (!user) {
@@ -297,19 +391,27 @@ app.post(
 
             email:
               user.email,
+
+            role:
+              "customer",
           },
+
           JWT_SECRET,
+
           {
             expiresIn:
               "7d",
           }
         );
 
-      res.status(200).json({
+      return res.status(200).json({
         message:
           "Login successful.",
 
         token,
+
+        role:
+          "customer",
 
         user: {
           id:
@@ -327,12 +429,13 @@ app.post(
       });
 
     } catch (error) {
+
       console.error(
-        "Customer login error:",
+        "Login error:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Login failed.",
 
@@ -345,7 +448,7 @@ app.post(
 
 
 // ======================================================
-// CUSTOMER AUTHENTICATION MIDDLEWARE
+// CUSTOMER AUTHENTICATION
 // ======================================================
 
 const authenticateUser = (
@@ -353,7 +456,9 @@ const authenticateUser = (
   res,
   next
 ) => {
+
   try {
+
     const authHeader =
       req.headers.authorization;
 
@@ -371,6 +476,7 @@ const authenticateUser = (
       parts.length !== 2 ||
       parts[0] !== "Bearer"
     ) {
+
       return res.status(401).json({
         message:
           "Invalid authentication format.",
@@ -386,10 +492,15 @@ const authenticateUser = (
         JWT_SECRET
       );
 
-    if (!decoded.userId) {
+    if (
+      !decoded.userId ||
+      decoded.role !==
+        "customer"
+    ) {
+
       return res.status(401).json({
         message:
-          "Invalid user token.",
+          "Customer authentication required.",
       });
     }
 
@@ -399,6 +510,7 @@ const authenticateUser = (
     next();
 
   } catch (error) {
+
     console.error(
       "User authentication error:",
       error.message
@@ -413,292 +525,7 @@ const authenticateUser = (
 
 
 // ======================================================
-// GET CURRENT CUSTOMER
-// ======================================================
-
-app.get(
-  "/api/auth/me",
-  authenticateUser,
-  async (req, res) => {
-    try {
-      const user =
-        await User.findById(
-          req.user.userId
-        ).select("-password");
-
-      if (!user) {
-        return res.status(404).json({
-          message:
-            "User not found.",
-        });
-      }
-
-      res.status(200).json({
-        user,
-      });
-
-    } catch (error) {
-      console.error(
-        "Get current user error:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Failed to get user information.",
-      });
-    }
-  }
-);
-
-
-// ======================================================
-// CREATE ADMIN ACCOUNT
-// ======================================================
-
-app.post(
-  "/api/admin/create",
-  async (req, res) => {
-    try {
-      const {
-        username,
-        password,
-      } = req.body;
-
-      if (!username || !password) {
-        return res.status(400).json({
-          message:
-            "Username and password are required.",
-        });
-      }
-
-      if (password.length < 6) {
-        return res.status(400).json({
-          message:
-            "Password must be at least 6 characters.",
-        });
-      }
-
-      const existingAdmin =
-        await Admin.findOne({
-          username:
-            username.trim(),
-        });
-
-      if (existingAdmin) {
-        return res.status(409).json({
-          message:
-            "Admin username already exists.",
-        });
-      }
-
-      const hashedPassword =
-        await bcrypt.hash(
-          password,
-          10
-        );
-
-      const admin =
-        new Admin({
-          username:
-            username.trim(),
-
-          password:
-            hashedPassword,
-        });
-
-      await admin.save();
-
-      res.status(201).json({
-        message:
-          "Admin account created successfully!",
-      });
-
-    } catch (error) {
-      console.error(
-        "Create admin error:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Failed to create admin account.",
-
-        error:
-          error.message,
-      });
-    }
-  }
-);
-
-
-// ======================================================
-// RESET ADMIN PASSWORD
-// ======================================================
-
-app.post(
-  "/api/admin/reset-password",
-  async (req, res) => {
-    try {
-      const {
-        username,
-        newPassword,
-      } = req.body;
-
-      if (
-        !username ||
-        !newPassword
-      ) {
-        return res.status(400).json({
-          message:
-            "Username and new password are required.",
-        });
-      }
-
-      const admin =
-        await Admin.findOne({
-          username:
-            username.trim(),
-        });
-
-      if (!admin) {
-        return res.status(404).json({
-          message:
-            "Admin username not found.",
-        });
-      }
-
-      const hashedPassword =
-        await bcrypt.hash(
-          newPassword,
-          10
-        );
-
-      admin.password =
-        hashedPassword;
-
-      await admin.save();
-
-      res.status(200).json({
-        message:
-          "Admin password reset successfully!",
-      });
-
-    } catch (error) {
-      console.error(
-        "Reset password error:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Failed to reset admin password.",
-
-        error:
-          error.message,
-      });
-    }
-  }
-);
-
-
-// ======================================================
-// ADMIN LOGIN
-// ======================================================
-
-app.post(
-  "/api/admin/login",
-  async (req, res) => {
-    try {
-      const {
-        username,
-        password,
-      } = req.body;
-
-      if (!username || !password) {
-        return res.status(400).json({
-          message:
-            "Username and password are required.",
-        });
-      }
-
-      const admin =
-        await Admin.findOne({
-          username:
-            username.trim(),
-        });
-
-      if (!admin) {
-        return res.status(401).json({
-          message:
-            "Invalid username or password.",
-        });
-      }
-
-      const passwordMatch =
-        await bcrypt.compare(
-          password,
-          admin.password
-        );
-
-      if (!passwordMatch) {
-        return res.status(401).json({
-          message:
-            "Invalid username or password.",
-        });
-      }
-
-      const token =
-        jwt.sign(
-          {
-            adminId:
-              admin._id,
-
-            username:
-              admin.username,
-          },
-          JWT_SECRET,
-          {
-            expiresIn:
-              "24h",
-          }
-        );
-
-      res.status(200).json({
-        message:
-          "Admin login successful.",
-
-        token,
-
-        admin: {
-          id:
-            admin._id,
-
-          username:
-            admin.username,
-        },
-      });
-
-    } catch (error) {
-      console.error(
-        "Admin login error:",
-        error
-      );
-
-      res.status(500).json({
-        message:
-          "Login failed.",
-
-        error:
-          error.message,
-      });
-    }
-  }
-);
-
-
-// ======================================================
-// ADMIN AUTHENTICATION MIDDLEWARE
+// ADMIN AUTHENTICATION
 // ======================================================
 
 const authenticateAdmin = (
@@ -706,7 +533,9 @@ const authenticateAdmin = (
   res,
   next
 ) => {
+
   try {
+
     const authHeader =
       req.headers.authorization;
 
@@ -724,6 +553,7 @@ const authenticateAdmin = (
       parts.length !== 2 ||
       parts[0] !== "Bearer"
     ) {
+
       return res.status(401).json({
         message:
           "Invalid authentication format.",
@@ -739,7 +569,12 @@ const authenticateAdmin = (
         JWT_SECRET
       );
 
-    if (!decoded.adminId) {
+    if (
+      !decoded.adminId ||
+      decoded.role !==
+        "admin"
+    ) {
+
       return res.status(401).json({
         message:
           "Admin authentication required.",
@@ -752,6 +587,7 @@ const authenticateAdmin = (
     next();
 
   } catch (error) {
+
     console.error(
       "Admin authentication error:",
       error.message
@@ -766,14 +602,58 @@ const authenticateAdmin = (
 
 
 // ======================================================
-// VERIFY ADMIN TOKEN
+// CURRENT CUSTOMER
+// ======================================================
+
+app.get(
+  "/api/auth/me",
+  authenticateUser,
+  async (req, res) => {
+
+    try {
+
+      const user =
+        await User.findById(
+          req.user.userId
+        ).select("-password");
+
+      if (!user) {
+        return res.status(404).json({
+          message:
+            "User not found.",
+        });
+      }
+
+      return res.status(200).json({
+        user,
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Get current user error:",
+        error
+      );
+
+      return res.status(500).json({
+        message:
+          "Failed to get user information.",
+      });
+    }
+  }
+);
+
+
+// ======================================================
+// VERIFY ADMIN
 // ======================================================
 
 app.get(
   "/api/admin/verify",
   authenticateAdmin,
   (req, res) => {
-    res.status(200).json({
+
+    return res.status(200).json({
       authenticated:
         true,
 
@@ -792,7 +672,9 @@ app.post(
   "/api/shipments",
   authenticateUser,
   async (req, res) => {
+
     try {
+
       const {
         senderName,
         senderPhone,
@@ -814,6 +696,7 @@ app.post(
         !parcelType ||
         !weight
       ) {
+
         return res.status(400).json({
           message:
             "Please provide all required shipment information.",
@@ -832,6 +715,7 @@ app.post(
 
       const shipment =
         new Shipment({
+
           user:
             req.user.userId,
 
@@ -859,7 +743,8 @@ app.post(
 
       await shipment.save();
 
-      res.status(201).json({
+      return res.status(201).json({
+
         message:
           "Shipment created successfully!",
 
@@ -867,12 +752,13 @@ app.post(
       });
 
     } catch (error) {
+
       console.error(
         "Create shipment error:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Failed to create shipment.",
 
@@ -885,14 +771,16 @@ app.post(
 
 
 // ======================================================
-// GET CUSTOMER'S SHIPMENTS
+// CUSTOMER SHIPMENTS
 // ======================================================
 
 app.get(
   "/api/my-shipments",
   authenticateUser,
   async (req, res) => {
+
     try {
+
       const shipments =
         await Shipment.find({
           user:
@@ -902,17 +790,18 @@ app.get(
             -1,
         });
 
-      res.status(200).json({
+      return res.status(200).json({
         shipments,
       });
 
     } catch (error) {
+
       console.error(
         "Get customer shipments error:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Failed to get your shipments.",
 
@@ -925,30 +814,33 @@ app.get(
 
 
 // ======================================================
-// FIND SHIPMENT BY TRACKING NUMBER
+// TRACK SHIPMENT
 // ======================================================
 
 app.get(
   "/api/shipments/:trackingNumber",
   async (req, res) => {
+
     try {
+
       const trackingNumber =
         req.params.trackingNumber.trim();
 
       const shipment =
         await Shipment.findOne({
-          trackingNumber:
-            trackingNumber,
+          trackingNumber,
         });
 
       if (!shipment) {
+
         return res.status(404).json({
           message:
             "Shipment not found.",
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
+
         message:
           "Shipment found.",
 
@@ -956,12 +848,13 @@ app.get(
       });
 
     } catch (error) {
+
       console.error(
         "Tracking error:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Failed to track shipment.",
 
@@ -974,14 +867,16 @@ app.get(
 
 
 // ======================================================
-// GET ALL SHIPMENTS - ADMIN ONLY
+// GET ALL SHIPMENTS - ADMIN
 // ======================================================
 
 app.get(
   "/api/shipments",
   authenticateAdmin,
   async (req, res) => {
+
     try {
+
       const shipments =
         await Shipment.find()
           .sort({
@@ -989,17 +884,18 @@ app.get(
               -1,
           });
 
-      res.status(200).json({
+      return res.status(200).json({
         shipments,
       });
 
     } catch (error) {
+
       console.error(
         "Get shipments error:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Failed to get shipments.",
 
@@ -1012,14 +908,16 @@ app.get(
 
 
 // ======================================================
-// UPDATE SHIPMENT STATUS - ADMIN ONLY
+// UPDATE SHIPMENT STATUS - ADMIN
 // ======================================================
 
 app.put(
   "/api/shipments/:trackingNumber/status",
   authenticateAdmin,
   async (req, res) => {
+
     try {
+
       const trackingNumber =
         req.params.trackingNumber.trim();
 
@@ -1040,6 +938,7 @@ app.put(
           status
         )
       ) {
+
         return res.status(400).json({
           message:
             "Invalid shipment status.",
@@ -1048,14 +947,13 @@ app.put(
 
       const shipment =
         await Shipment.findOneAndUpdate(
+
           {
-            trackingNumber:
-              trackingNumber,
+            trackingNumber,
           },
 
           {
-            status:
-              status,
+            status,
           },
 
           {
@@ -1064,13 +962,15 @@ app.put(
         );
 
       if (!shipment) {
+
         return res.status(404).json({
           message:
             "Shipment not found.",
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
+
         message:
           "Shipment status updated successfully.",
 
@@ -1078,12 +978,13 @@ app.put(
       });
 
     } catch (error) {
+
       console.error(
         "Update status error:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Failed to update shipment status.",
 
@@ -1096,72 +997,49 @@ app.put(
 
 
 // ======================================================
-// DELETE SHIPMENT - ADMIN ONLY
+// DELETE SHIPMENT - ADMIN
 // ======================================================
 
 app.delete(
   "/api/shipments/:trackingNumber",
   authenticateAdmin,
   async (req, res) => {
+
     try {
+
       const trackingNumber =
         req.params.trackingNumber.trim();
 
       const shipment =
         await Shipment.findOneAndDelete({
-          trackingNumber:
-            trackingNumber,
+          trackingNumber,
         });
 
       if (!shipment) {
+
         return res.status(404).json({
           message:
             "Shipment not found.",
         });
       }
 
-      res.status(200).json({
+      return res.status(200).json({
         message:
           "Shipment deleted successfully!",
       });
 
     } catch (error) {
+
       console.error(
         "Delete shipment error:",
         error
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "Failed to delete shipment.",
 
         error:
-          error.message,
-      });
-    }
-  }
-);
-
-
-// ======================================================
-// CHECK ADMINS
-// ======================================================
-
-app.get(
-  "/api/admin/check",
-  async (req, res) => {
-    try {
-      const admins =
-        await Admin.find()
-          .select("username");
-
-      res.json({
-        admins,
-      });
-
-    } catch (error) {
-      res.status(500).json({
-        message:
           error.message,
       });
     }
@@ -1176,8 +1054,10 @@ app.get(
 app.listen(
   PORT,
   () => {
+
     console.log(
-      `Server running on port ${PORT}`
+      `SwiftParcel backend running on port ${PORT}`
     );
+
   }
 );
