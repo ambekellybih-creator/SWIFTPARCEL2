@@ -17,7 +17,6 @@ function HomeScreen() {
   const handleTrack = async () => {
     const number = trackingNumber.trim();
 
-    // Check if tracking number is empty
     if (!number) {
       setTrackingError("Please enter a tracking number.");
       return;
@@ -29,9 +28,9 @@ function HomeScreen() {
 
     try {
       const apiUrl =
-  process.env.REACT_APP_API_URL ||
-  "https://swiftparcel-api-k6i6.onrender.com";
-      // Find shipment using tracking number
+        process.env.REACT_APP_API_URL ||
+        "https://swiftparcel-api-k6i6.onrender.com";
+
       const response = await fetch(
         `${apiUrl}/api/shipments/${encodeURIComponent(number)}`
       );
@@ -40,7 +39,6 @@ function HomeScreen() {
 
       let data = {};
 
-      // Try to read server response
       try {
         data = JSON.parse(responseText);
       } catch {
@@ -49,25 +47,21 @@ function HomeScreen() {
         );
       }
 
-      // Shipment not found
       if (!response.ok) {
         throw new Error(
           data.message || "Shipment not found."
         );
       }
 
-      // Make sure shipment exists
       if (!data.shipment) {
-        throw new Error("Shipment information was not found.");
+        throw new Error(
+          "Shipment information was not found."
+        );
       }
 
-      // Save shipment
       setShipment(data.shipment);
 
-      // ==================================================
-      // AUTOMATICALLY OPEN TRACKING MAP
-      // ==================================================
-
+      // Automatically open tracking map
       navigate(
         `/tracking/${encodeURIComponent(
           data.shipment.trackingNumber
@@ -81,6 +75,7 @@ function HomeScreen() {
         error.message ||
           "Unable to track shipment."
       );
+
     } finally {
       setTrackingLoading(false);
     }
@@ -173,7 +168,6 @@ function HomeScreen() {
                   event.target.value
                 );
 
-                // Clear previous error
                 if (trackingError) {
                   setTrackingError("");
                 }
@@ -197,8 +191,6 @@ function HomeScreen() {
 
           </div>
 
-          {/* Tracking error */}
-
           {trackingError && (
             <p className="tracking-error">
               {trackingError}
@@ -212,10 +204,6 @@ function HomeScreen() {
 
       {/* ==================================================
           TRACKING RESULT
-          
-          This is kept here in case shipment data is
-          returned, although successful tracking now
-          automatically opens the map page.
       ================================================== */}
 
       {shipment && (
@@ -434,11 +422,9 @@ function HomeScreen() {
 
           <button
             type="button"
-            onClick={() => {
-              alert(
-                "Recent shipments will be expanded soon."
-              );
-            }}
+            onClick={() =>
+              navigate("/shipments")
+            }
           >
             View all
           </button>
@@ -506,11 +492,9 @@ function HomeScreen() {
         <button
           className="bottom-nav-item"
           type="button"
-          onClick={() => {
-            alert(
-              "Shipments page will be built soon."
-            );
-          }}
+          onClick={() =>
+            navigate("/shipments")
+          }
         >
 
           <span>

@@ -7,6 +7,7 @@ import {
 } from "react-router-dom";
 
 import SplashScreen from "./pages/SplashScreen";
+import OnboardingScreen from "./pages/OnboardingScreen";
 import LoginScreen from "./pages/LoginScreen";
 import SignUpScreen from "./pages/SignUpScreen";
 import HomeScreen from "./pages/HomeScreen";
@@ -70,11 +71,25 @@ function App() {
     <BrowserRouter>
       <Routes>
 
+        {/* ============================= */}
+        {/* SPLASH SCREEN                 */}
+        {/* ============================= */}
         <Route
           path="/"
           element={<SplashScreen />}
         />
 
+        {/* ============================= */}
+        {/* ONBOARDING SCREEN             */}
+        {/* ============================= */}
+        <Route
+          path="/onboarding"
+          element={<OnboardingScreen />}
+        />
+
+        {/* ============================= */}
+        {/* AUTHENTICATION                 */}
+        {/* ============================= */}
         <Route
           path="/login"
           element={<LoginScreen />}
@@ -85,11 +100,17 @@ function App() {
           element={<SignUpScreen />}
         />
 
+        {/* ============================= */}
+        {/* HOME                           */}
+        {/* ============================= */}
         <Route
           path="/home"
           element={<HomeScreen />}
         />
 
+        {/* ============================= */}
+        {/* PARCEL CREATION                */}
+        {/* ============================= */}
         <Route
           path="/send-parcel"
           element={<SendParcel />}
@@ -110,28 +131,41 @@ function App() {
           element={<ConfirmShipment />}
         />
 
+        {/* ============================= */}
+        {/* PAYMENT                        */}
+        {/* ============================= */}
         <Route
           path="/payment"
           element={<PaymentScreen />}
         />
 
+        {/* ============================= */}
+        {/* SHIPMENTS                      */}
+        {/* ============================= */}
         <Route
           path="/shipments"
           element={<Shipments />}
         />
 
-        {/* TEMPORARY TEST ROUTE */}
+        {/* ============================= */}
+        {/* TRACKING TEST                  */}
+        {/* ============================= */}
         <Route
           path="/tracking-test"
           element={<TrackingTest />}
         />
 
-        {/* REAL TRACKING ROUTE */}
+        {/* ============================= */}
+        {/* REAL TRACKING                  */}
+        {/* ============================= */}
         <Route
           path="/tracking/:trackingNumber"
           element={<TrackingDetails />}
         />
 
+        {/* ============================= */}
+        {/* ADMIN                          */}
+        {/* ============================= */}
         <Route
           path="/admin"
           element={<AdminDashboard />}
