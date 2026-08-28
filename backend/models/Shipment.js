@@ -29,6 +29,11 @@ const shipmentSchema = new mongoose.Schema(
       required: true,
     },
 
+    senderCity: {
+      type: String,
+      required: true,
+    },
+
     receiverName: {
       type: String,
       required: true,
@@ -44,6 +49,11 @@ const shipmentSchema = new mongoose.Schema(
       required: true,
     },
 
+    receiverCity: {
+      type: String,
+      required: true,
+    },
+
     parcelType: {
       type: String,
       required: true,
@@ -52,6 +62,11 @@ const shipmentSchema = new mongoose.Schema(
     weight: {
       type: Number,
       required: true,
+    },
+
+    deliveryDate: {
+      type: Date,
+      required: false,
     },
 
     status: {
