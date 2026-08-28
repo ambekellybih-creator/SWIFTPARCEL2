@@ -1,349 +1,802 @@
-.tracking-details-page {
+/* ======================================================
+   TRACKING DETAILS SCREEN
+====================================================== */
+
+.tracking-details-screen {
   min-height: 100vh;
-  background: #f6f7ff;
+  background: #f5faf7;
+  color: #18352a;
   padding-bottom: 40px;
-  color: #111;
 }
 
-.tracking-header {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 24px;
+/* ======================================================
+   HEADER
+====================================================== */
+
+.tracking-details-header {
+  height: 70px;
   background: #ffffff;
+  border-bottom: 1px solid #e4eee8;
+
+  display: grid;
+  grid-template-columns: 50px 1fr 50px;
+  align-items: center;
+
+  padding: 0 20px;
+
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
-.tracking-header p {
+.tracking-details-header h1 {
   margin: 0;
-  color: #3424e9;
-  font-size: 13px;
-  font-weight: 700;
-}
+  text-align: center;
 
-.tracking-header h1 {
-  margin: 3px 0 0;
   font-size: 22px;
+  font-weight: 700;
+  color: #168b4b;
 }
 
 .tracking-back-button {
   width: 42px;
   height: 42px;
+
   border: none;
   border-radius: 50%;
-  background: #f0f1ff;
+
+  background: #eaf7ef;
+  color: #168b4b;
+
   font-size: 24px;
   cursor: pointer;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.tracking-number-card {
-  margin: 18px;
+.tracking-back-button:hover {
+  background: #d9f0e2;
+}
+
+/* ======================================================
+   SHIPMENT SUMMARY
+====================================================== */
+
+.tracking-summary {
+  max-width: 1100px;
+  margin: 20px auto 0;
+
   padding: 20px;
+
   background: #ffffff;
-  border-radius: 18px;
+
+  border-radius: 16px;
+
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 15px;
-  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.06);
+
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
 }
 
-.tracking-number-card div {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.tracking-label {
+  display: block;
+
+  font-size: 11px;
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  color: #7b9186;
+
+  margin-bottom: 6px;
 }
 
-.tracking-number-card span:first-child {
-  color: #777;
-  font-size: 12px;
-}
-
-.tracking-number-card strong {
+.tracking-summary strong {
   font-size: 18px;
+  color: #18352a;
 }
 
 .tracking-status {
-  padding: 8px 13px;
-  border-radius: 20px;
-  background: #e8f9ed;
-  color: #159447;
-  font-size: 12px;
+  padding: 8px 14px;
+
+  border-radius: 30px;
+
+  background: #eaf7ef;
+  color: #168b4b;
+
+  font-size: 13px;
   font-weight: 700;
-  white-space: nowrap;
 }
 
-.tracking-status.pending {
-  background: #fff5d9;
-  color: #a36d00;
+/* ======================================================
+   LIVE SHIPMENT CARD
+====================================================== */
+
+.live-shipment-card {
+  max-width: 1100px;
+
+  margin: 16px auto;
+
+  padding: 20px;
+
+  background: #168b4b;
+
+  border-radius: 16px;
+
+  color: white;
+
+  box-shadow: 0 6px 20px rgba(22, 139, 75, 0.18);
 }
 
-.tracking-status.picked-up,
-.tracking-status.in-transit {
-  background: #e5f0ff;
-  color: #1769d1;
-}
-
-.tracking-status.out-for-delivery {
-  background: #eee9ff;
-  color: #5a39d6;
-}
-
-.tracking-status.delivered {
-  background: #e8f9ed;
-  color: #159447;
-}
-
-.map-card {
-  margin: 18px;
-  overflow: hidden;
-  border-radius: 20px;
-  background: #ffffff;
-  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.08);
-}
-
-.map-title {
-  padding: 18px;
+.live-shipment-title {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 15px;
 }
 
-.map-title span {
-  color: #777;
-  font-size: 10px;
-  font-weight: 700;
-}
+.live-shipment-title > span {
+  width: 48px;
+  height: 48px;
 
-.map-title h2 {
-  margin: 5px 0 0;
-  font-size: 17px;
-}
+  background: rgba(255, 255, 255, 0.18);
 
-.live-indicator {
+  border-radius: 50%;
+
   display: flex;
   align-items: center;
-  gap: 6px;
-  color: #159447;
-  font-size: 12px;
-  font-weight: 700;
+  justify-content: center;
+
+  font-size: 24px;
 }
 
-.live-indicator span {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #159447;
+.live-shipment-title h2 {
+  margin: 0 0 5px;
+
+  font-size: 18px;
 }
+
+.live-shipment-title p {
+  margin: 0;
+
+  font-size: 14px;
+
+  opacity: 0.9;
+}
+
+/* ======================================================
+   MAP WRAPPER
+====================================================== */
+
+.tracking-map-wrapper {
+  max-width: 1100px;
+
+  margin: 16px auto;
+
+  position: relative;
+
+  background: #ffffff;
+
+  border-radius: 18px;
+
+  overflow: hidden;
+
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.07);
+
+  /*
+    IMPORTANT:
+    The wrapper MUST have a height.
+  */
+
+  height: 520px;
+}
+
+/* ======================================================
+   LEAFLET MAP
+====================================================== */
 
 .tracking-map {
-  width: 100%;
-}
+  width: 100% !important;
 
-.tracking-map .leaflet-container {
+  /*
+    IMPORTANT:
+    Leaflet will NOT show if this height
+    is missing.
+  */
+
+  height: 520px !important;
+
+  min-height: 520px !important;
+
   z-index: 1;
 }
 
-.route-summary {
-  margin: 18px;
-  padding: 20px;
+/* Make sure Leaflet itself gets space */
+
+.tracking-map-wrapper
+.leaflet-container {
+  width: 100% !important;
+
+  height: 520px !important;
+
+  min-height: 520px !important;
+
+  background: #e8f1ec;
+}
+
+/* ======================================================
+   LEAFLET CONTROLS
+====================================================== */
+
+.leaflet-control-zoom {
+  border: none !important;
+}
+
+.leaflet-control-zoom a {
+  color: #168b4b !important;
+
+  background: white !important;
+}
+
+/* ======================================================
+   CUSTOM MARKERS
+====================================================== */
+
+.custom-map-marker {
+  background: transparent !important;
+
+  border: none !important;
+}
+
+.pickup-marker {
+  width: 44px;
+  height: 44px;
+
+  background: #168b4b;
+
+  border: 4px solid white;
+
+  border-radius: 50%;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 21px;
+}
+
+.destination-marker {
+  width: 44px;
+  height: 44px;
+
+  background: #e53935;
+
+  border: 4px solid white;
+
+  border-radius: 50%;
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 21px;
+}
+
+.vehicle-marker {
+  width: 48px;
+  height: 48px;
+
+  background: white;
+
+  border: 3px solid #168b4b;
+
+  border-radius: 50%;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  font-size: 24px;
+}
+
+/* ======================================================
+   ROUTE LOADING
+====================================================== */
+
+.route-loading-message {
+  position: absolute;
+
+  top: 15px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  z-index: 1000;
+
+  background: white;
+
+  color: #168b4b;
+
+  padding: 10px 16px;
+
+  border-radius: 30px;
+
+  font-size: 13px;
+  font-weight: 600;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+}
+
+/* ======================================================
+   ROUTE ERROR
+====================================================== */
+
+.route-error-message {
+  position: absolute;
+
+  bottom: 15px;
+  left: 50%;
+
+  transform: translateX(-50%);
+
+  z-index: 1000;
+
+  background: #fff7e6;
+
+  color: #9a6700;
+
+  padding: 10px 16px;
+
+  border-radius: 30px;
+
+  font-size: 12px;
+
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+
+  white-space: nowrap;
+}
+
+/* ======================================================
+   LOCATION ERROR
+====================================================== */
+
+.map-location-error {
+  height: 520px;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 30px;
+
   background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.06);
+}
+
+.map-location-error > div {
+  font-size: 45px;
+
+  margin-bottom: 10px;
+}
+
+.map-location-error h3 {
+  margin: 0 0 8px;
+
+  color: #18352a;
+}
+
+.map-location-error p {
+  color: #71857a;
+
+  margin: 0 0 15px;
+}
+
+.map-location-error small {
+  color: #8a9a91;
+
+  line-height: 1.8;
+}
+
+/* ======================================================
+   ROUTE INFORMATION
+====================================================== */
+
+.route-information {
+  max-width: 1100px;
+
+  margin: 16px auto;
+
+  padding: 22px;
+
+  background: white;
+
+  border-radius: 16px;
+
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
 }
 
 .route-location {
   display: flex;
+
   align-items: center;
+
   gap: 14px;
 }
 
-.route-location div:last-child {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.route-location span {
-  font-size: 10px;
-  color: #888;
-  font-weight: 700;
-}
-
-.route-location strong {
-  font-size: 14px;
-}
-
 .route-dot {
-  width: 13px;
-  height: 13px;
+  width: 42px;
+  height: 42px;
+
   border-radius: 50%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   flex-shrink: 0;
 }
 
-.route-dot.pickup {
-  background: #19a65a;
+.pickup-dot {
+  background: #eaf7ef;
 }
 
-.route-dot.destination {
-  background: #e43f3f;
+.destination-dot {
+  background: #ffecec;
+}
+
+.route-location span {
+  display: block;
+
+  font-size: 10px;
+
+  font-weight: 700;
+
+  letter-spacing: 1px;
+
+  color: #8a9a91;
+
+  margin-bottom: 4px;
+}
+
+.route-location strong {
+  display: block;
+
+  font-size: 15px;
+
+  color: #18352a;
 }
 
 .route-line {
   width: 2px;
+
   height: 28px;
-  background: #d5d5d5;
-  margin: 4px 0 4px 5px;
+
+  background: #d8e6de;
+
+  margin-left: 20px;
 }
 
-.shipment-info-card,
-.progress-card {
-  margin: 18px;
-  padding: 20px;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(20, 20, 80, 0.06);
+/* ======================================================
+   PROGRESS CARD
+====================================================== */
+
+.shipment-progress-card {
+  max-width: 1100px;
+
+  margin: 16px auto;
+
+  padding: 24px;
+
+  background: white;
+
+  border-radius: 16px;
+
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.05);
 }
 
-.shipment-info-card h2,
-.progress-card h2 {
-  margin: 0 0 18px;
-  font-size: 18px;
+.progress-header {
+  display: flex;
+
+  justify-content: space-between;
+
+  margin-bottom: 18px;
 }
 
-.shipment-info-grid {
+.progress-header h3 {
+  margin: 0 0 5px;
+
+  color: #18352a;
+}
+
+.progress-header p {
+  margin: 0;
+
+  color: #168b4b;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+/* ======================================================
+   PROGRESS BAR
+====================================================== */
+
+.progress-bar {
+  width: 100%;
+
+  height: 10px;
+
+  background: #e5eee9;
+
+  border-radius: 20px;
+
+  overflow: hidden;
+
+  margin-bottom: 24px;
+}
+
+.progress-fill {
+  height: 100%;
+
+  background: #168b4b;
+
+  border-radius: 20px;
+
+  transition: width 0.8s ease;
+}
+
+/* ======================================================
+   PROGRESS STAGES
+====================================================== */
+
+.progress-stages {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 18px;
+
+  grid-template-columns:
+    repeat(4, 1fr);
+
+  gap: 10px;
 }
 
-.shipment-info-grid div {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.shipment-info-grid span {
-  color: #888;
-  font-size: 11px;
-}
-
-.shipment-info-grid strong {
-  font-size: 14px;
-}
-
-.progress-step {
-  display: flex;
-  gap: 14px;
-  position: relative;
-  padding-bottom: 24px;
-}
-
-.progress-step:last-child {
-  padding-bottom: 0;
-}
-
-.progress-step:not(:last-child)::after {
-  content: "";
-  position: absolute;
-  left: 15px;
-  top: 32px;
-  width: 2px;
-  height: calc(100% - 15px);
-  background: #ddd;
-}
-
-.progress-step.completed:not(:last-child)::after {
-  background: #3424e9;
-}
-
-.progress-icon {
-  width: 31px;
-  height: 31px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #eeeeee;
-  color: #888;
-  font-size: 12px;
-  font-weight: 700;
-  flex-shrink: 0;
-  position: relative;
-  z-index: 2;
-}
-
-.progress-step.completed .progress-icon {
-  background: #3424e9;
-  color: #ffffff;
-}
-
-.progress-step.current .progress-icon {
-  box-shadow: 0 0 0 5px #e8e5ff;
-}
-
-.progress-content strong {
-  font-size: 14px;
-}
-
-.progress-content p {
-  margin: 4px 0 0;
-  color: #888;
-  font-size: 12px;
-}
-
-.tracking-home-button,
-.tracking-primary-button {
-  margin: 18px;
-  width: calc(100% - 36px);
-  padding: 15px;
-  border: none;
-  border-radius: 12px;
-  background: #3424e9;
-  color: #ffffff;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.tracking-loading,
-.tracking-error-page {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+.progress-stage {
   text-align: center;
+
+  color: #a2b0a9;
+}
+
+.progress-stage span {
+  width: 30px;
+  height: 30px;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  margin: 0 auto 7px;
+
+  border-radius: 50%;
+
+  background: #edf2ef;
+
+  font-size: 13px;
+}
+
+.progress-stage.active {
+  color: #168b4b;
+}
+
+.progress-stage.active span {
+  background: #168b4b;
+
+  color: white;
+}
+
+.progress-stage small {
+  font-size: 11px;
+  font-weight: 600;
+}
+
+/* ======================================================
+   LOADING
+====================================================== */
+
+.tracking-loading {
+  min-height: 100vh;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
   padding: 30px;
 }
 
-.tracking-loading-icon,
-.tracking-error-icon {
-  font-size: 50px;
+.tracking-loading-icon {
+  font-size: 55px;
+
   margin-bottom: 15px;
 }
 
-.tracking-loading h2,
-.tracking-error-page h2 {
-  margin: 0;
+.tracking-loading h2 {
+  color: #168b4b;
+
+  margin-bottom: 8px;
 }
 
-.tracking-loading p,
-.tracking-error-page p {
-  color: #777;
+.tracking-loading p {
+  color: #71857a;
 }
 
-@media (max-width: 600px) {
-  .tracking-number-card {
-    align-items: flex-start;
-    flex-direction: column;
+/* ======================================================
+   ERROR
+====================================================== */
+
+.tracking-error {
+  min-height: 100vh;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 30px;
+}
+
+.tracking-error-icon {
+  font-size: 50px;
+
+  margin-bottom: 15px;
+}
+
+.tracking-error h2 {
+  color: #18352a;
+
+  margin-bottom: 10px;
+}
+
+.tracking-error p {
+  color: #71857a;
+
+  max-width: 500px;
+
+  margin-bottom: 20px;
+}
+
+.tracking-error button {
+  border: none;
+
+  background: #168b4b;
+
+  color: white;
+
+  padding: 12px 20px;
+
+  border-radius: 10px;
+
+  cursor: pointer;
+
+  font-weight: 600;
+}
+
+.tracking-error button:hover {
+  background: #11723d;
+}
+
+/* ======================================================
+   MOBILE
+====================================================== */
+
+@media (max-width: 768px) {
+  .tracking-details-header {
+    height: 60px;
+
+    padding: 0 12px;
   }
 
-  .map-title {
-    align-items: flex-start;
-    flex-direction: column;
+  .tracking-details-header h1 {
+    font-size: 18px;
   }
 
-  .shipment-info-grid {
-    grid-template-columns: 1fr;
+  .tracking-summary,
+  .live-shipment-card,
+  .tracking-map-wrapper,
+  .route-information,
+  .shipment-progress-card {
+    margin-left: 12px;
+    margin-right: 12px;
+  }
+
+  .tracking-map-wrapper {
+    height: 420px;
+  }
+
+  .tracking-map {
+    height: 420px !important;
+
+    min-height: 420px !important;
+  }
+
+  .tracking-map-wrapper
+  .leaflet-container {
+    height: 420px !important;
+
+    min-height: 420px !important;
+  }
+
+  .progress-stages {
+    grid-template-columns:
+      repeat(2, 1fr);
+
+    row-gap: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .tracking-summary {
+    flex-direction: column;
+
+    align-items: flex-start;
+
+    gap: 12px;
+  }
+
+  .live-shipment-title h2 {
+    font-size: 15px;
+  }
+
+  .live-shipment-title p {
+    font-size: 12px;
+  }
+
+  .tracking-map-wrapper {
+    height: 380px;
+  }
+
+  .tracking-map {
+    height: 380px !important;
+
+    min-height: 380px !important;
+  }
+
+  .tracking-map-wrapper
+  .leaflet-container {
+    height: 380px !important;
+
+    min-height: 380px !important;
+  }
+
+  .route-error-message {
+    font-size: 10px;
+
+    white-space: normal;
+
+    width: 80%;
+
+    text-align: center;
   }
 }

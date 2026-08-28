@@ -18,11 +18,15 @@ function SplashScreen() {
       <div className="splash-content">
 
         <div className="splash-logo">
+
           <div className="splash-logo-icon">
             <span>📦</span>
           </div>
 
-          <h1>SwiftParcel</h1>
+          <h1>
+            SwiftParcel
+          </h1>
+
         </div>
 
         <p className="splash-tagline">

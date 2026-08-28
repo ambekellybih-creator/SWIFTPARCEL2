@@ -4,28 +4,33 @@ import "./OnboardingScreen.css";
 import onboardingIllustration from "../assets/onboarding-illustration.png";
 
 function OnboardingScreen() {
-    const navigate = useNavigate();
+  const navigate = useNavigate();
+
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const slides = [
     {
       title: "Fast. Safe. Reliable.",
-      description: "Delivering smiles to every destination.",
+      description:
+        "Delivering smiles to every destination.",
       image: onboardingIllustration,
     },
     {
       title: "Send with Ease.",
-      description: "Send your parcels quickly and securely.",
+      description:
+        "Send your parcels quickly and securely.",
       image: onboardingIllustration,
     },
     {
       title: "Track Every Step.",
-      description: "Know exactly where your parcel is.",
+      description:
+        "Know exactly where your parcel is.",
       image: onboardingIllustration,
     },
     {
       title: "Receive with Confidence.",
-      description: "Safe delivery right to your destination.",
+      description:
+        "Safe delivery right to your destination.",
       image: onboardingIllustration,
     },
   ];
@@ -43,44 +48,69 @@ function OnboardingScreen() {
   return (
     <div className="onboarding-screen">
 
-      {/* Logo */}
+      {/* LOGO */}
       <div className="onboarding-logo">
-        <span className="logo-icon">◎</span>
-        <span>SwiftParcel</span>
+        <span className="logo-icon">
+          ◎
+        </span>
+
+        <span>
+          SwiftParcel
+        </span>
       </div>
 
-      {/* Illustration */}
+      {/* IMAGE */}
       <div className="onboarding-image-container">
+
         <img
           src={slide.image}
           alt="SwiftParcel delivery"
           className="onboarding-image"
         />
+
       </div>
 
-      {/* Text */}
+      {/* TEXT */}
       <div className="onboarding-text">
-        <h1>{slide.title}</h1>
 
-        <p>{slide.description}</p>
+        <h1>
+          {slide.title}
+        </h1>
+
+        <p>
+          {slide.description}
+        </p>
+
       </div>
 
-      {/* Dots */}
+      {/* DOTS */}
       <div className="onboarding-dots">
+
         {slides.map((_, index) => (
+
           <button
             key={index}
+            type="button"
             className={`onboarding-dot ${
-              currentSlide === index ? "active" : ""
+              currentSlide === index
+                ? "active"
+                : ""
             }`}
-            onClick={() => setCurrentSlide(index)}
-            aria-label={`Go to slide ${index + 1}`}
+            onClick={() =>
+              setCurrentSlide(index)
+            }
+            aria-label={`Go to slide ${
+              index + 1
+            }`}
           />
+
         ))}
+
       </div>
 
-      {/* Button */}
+      {/* NEXT / GET STARTED */}
       <button
+        type="button"
         className="get-started-button"
         onClick={handleNext}
       >

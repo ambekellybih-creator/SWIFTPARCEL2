@@ -10,6 +10,10 @@ function PaymentScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // ==========================================
+  // LOAD PENDING SHIPMENT
+  // ==========================================
+
   useEffect(() => {
     const savedShipment = localStorage.getItem(
       "swiftparcelPendingShipment"
@@ -34,6 +38,10 @@ function PaymentScreen() {
     }
   }, []);
 
+  // ==========================================
+  // DELIVERY FEE
+  // ==========================================
+
   const calculateDeliveryFee = () => {
     const weight =
       Number(shipment?.parcel?.weight) || 0;
@@ -55,14 +63,18 @@ function PaymentScreen() {
 
   const deliveryFee = calculateDeliveryFee();
 
+  // ==========================================
+  // PAYMENT
+  // ==========================================
+
   const handlePayment = async () => {
     setLoading(true);
     setError("");
 
     try {
-      // ==========================================
-      // GET CUSTOMER TOKEN
-      // ==========================================
+      // ========================================
+      // TOKEN
+      // ========================================
 
       const customerToken =
         localStorage.getItem(
@@ -78,29 +90,38 @@ function PaymentScreen() {
         );
       }
 
-      console.log(
-        "Customer token found:",
-        !!customerToken
-      );
+      // ========================================
+      // CHECK DELIVERY DATE
+      // ========================================
 
-      // ==========================================
+      const deliveryDate =
+        shipment?.parcel?.deliveryDate;
+
+      if (!deliveryDate) {
+        throw new Error(
+          "No delivery date was selected."
+        );
+      }
+
+      // ========================================
       // TEST PAYMENT
-      // ==========================================
+      // ========================================
 
       await new Promise((resolve) =>
-        setTimeout(resolve, 1500)
+        setTimeout(resolve, 1000)
       );
 
-      // ==========================================
+      // ========================================
       // BACKEND
-      // ==========================================
+      // ========================================
 
       const apiUrl =
+        process.env.REACT_APP_API_URL ||
         "https://swiftparcel-api-k6i6.onrender.com";
 
-      // ==========================================
+      // ========================================
       // CREATE SHIPMENT
-      // ==========================================
+      // ========================================
 
       const response = await fetch(
         `${apiUrl}/api/shipments`,
@@ -110,7 +131,6 @@ function PaymentScreen() {
           headers: {
             "Content-Type": "application/json",
 
-            // VERY IMPORTANT
             Authorization:
               `Bearer ${customerToken}`,
           },
@@ -123,9 +143,10 @@ function PaymentScreen() {
               shipment.sender?.phone || "",
 
             senderAddress:
-              `${shipment.sender?.address || ""}, ${
-                shipment.sender?.city || ""
-              }`.trim(),
+  shipment.sender?.address || "",
+
+  senderCity:
+  shipment.sender?.city || "",
 
             receiverName:
               shipment.receiver?.fullName || "",
@@ -134,9 +155,9 @@ function PaymentScreen() {
               shipment.receiver?.phone || "",
 
             receiverAddress:
-              `${shipment.receiver?.address || ""}, ${
-                shipment.receiver?.city || ""
-              }`.trim(),
+  shipment.receiver?.address || "",
+  receiverCity:
+  shipment.receiver?.city || "",
 
             parcelType:
               shipment.parcel?.parcelType || "",
@@ -145,6 +166,13 @@ function PaymentScreen() {
               Number(
                 shipment.parcel?.weight
               ) || 0,
+
+            // ==================================
+            // IMPORTANT
+            // ==================================
+
+            deliveryDate:
+              deliveryDate,
           }),
         }
       );
@@ -162,9 +190,9 @@ function PaymentScreen() {
         responseText
       );
 
-      // ==========================================
+      // ========================================
       // SERVER ERROR
-      // ==========================================
+      // ========================================
 
       if (!response.ok) {
         throw new Error(
@@ -172,9 +200,9 @@ function PaymentScreen() {
         );
       }
 
-      // ==========================================
+      // ========================================
       // PARSE RESPONSE
-      // ==========================================
+      // ========================================
 
       let data;
 
@@ -182,20 +210,15 @@ function PaymentScreen() {
         data = JSON.parse(
           responseText
         );
-      } catch (error) {
+      } catch {
         throw new Error(
           "The server returned an invalid response."
         );
       }
 
-      console.log(
-        "Created shipment:",
-        data
-      );
-
-      // ==========================================
+      // ========================================
       // CHECK SHIPMENT
-      // ==========================================
+      // ========================================
 
       if (!data.shipment) {
         throw new Error(
@@ -206,9 +229,9 @@ function PaymentScreen() {
       const createdShipment =
         data.shipment;
 
-      // ==========================================
+      // ========================================
       // SAVE SHIPMENT
-      // ==========================================
+      // ========================================
 
       localStorage.setItem(
         "swiftparcelShipment",
@@ -217,9 +240,9 @@ function PaymentScreen() {
         )
       );
 
-      // ==========================================
+      // ========================================
       // SAVE PAYMENT
-      // ==========================================
+      // ========================================
 
       const paymentData = {
         status: "paid",
@@ -243,17 +266,17 @@ function PaymentScreen() {
         )
       );
 
-      // ==========================================
-      // REMOVE PENDING SHIPMENT
-      // ==========================================
+      // ========================================
+      // REMOVE PENDING
+      // ========================================
 
       localStorage.removeItem(
         "swiftparcelPendingShipment"
       );
 
-      // ==========================================
+      // ========================================
       // GO TO SHIPMENTS
-      // ==========================================
+      // ========================================
 
       navigate("/shipments");
 
@@ -297,12 +320,10 @@ function PaymentScreen() {
           <button
             type="button"
             onClick={() =>
-              navigate(
-                "/confirm-shipment"
-              )
+              navigate("/home")
             }
           >
-            Go Back
+            Back to Home
           </button>
 
         </div>
@@ -312,15 +333,19 @@ function PaymentScreen() {
   }
 
   // ==========================================
-  // LOADING
+  // LOADING SHIPMENT
   // ==========================================
 
   if (!shipment) {
     return (
       <div className="payment-screen">
 
-        <div className="payment-loading">
-          Loading payment details...
+        <div className="payment-error-page">
+
+          <h2>
+            Loading shipment...
+          </h2>
+
         </div>
 
       </div>
@@ -334,19 +359,13 @@ function PaymentScreen() {
   return (
     <div className="payment-screen">
 
-      {/* HEADER */}
-
       <header className="payment-header">
 
         <button
           type="button"
-          className="payment-back-button"
           onClick={() =>
-            navigate(
-              "/confirm-shipment"
-            )
+            navigate("/confirm-shipment")
           }
-          disabled={loading}
         >
           ←
         </button>
@@ -355,268 +374,97 @@ function PaymentScreen() {
           Payment
         </h1>
 
-        <div className="payment-header-space"></div>
+        <div></div>
 
       </header>
 
-
-      {/* MAIN */}
-
       <main className="payment-content">
 
-        <div className="payment-title">
-
-          <div className="payment-icon">
-            💳
-          </div>
+        <div className="payment-card">
 
           <h2>
             Complete Your Payment
           </h2>
 
           <p>
-            Choose your payment method
-            to complete your shipment.
+            Choose your preferred payment method.
           </p>
 
-        </div>
+          <div className="payment-summary">
 
+            <div>
+              <span>
+                Delivery Fee
+              </span>
 
-        {/* SHIPMENT SUMMARY */}
+              <strong>
+                {deliveryFee.toLocaleString()} FCFA
+              </strong>
+            </div>
 
-        <section className="payment-card">
+            <div>
+              <span>
+                Delivery Date
+              </span>
 
-          <h3>
-            Shipment Summary
-          </h3>
-
-          <div className="payment-row">
-
-            <span>
-              Sender
-            </span>
-
-            <strong>
-              {shipment.sender?.fullName ||
-                "Not provided"}
-            </strong>
-
-          </div>
-
-          <div className="payment-row">
-
-            <span>
-              Receiver
-            </span>
-
-            <strong>
-              {shipment.receiver?.fullName ||
-                "Not provided"}
-            </strong>
+              <strong>
+                {shipment.parcel?.deliveryDate ||
+                  "Not provided"}
+              </strong>
+            </div>
 
           </div>
 
-          <div className="payment-row">
+          <div className="payment-methods">
 
-            <span>
-              Parcel Type
-            </span>
-
-            <strong>
-              {shipment.parcel?.parcelType ||
-                "Not provided"}
-            </strong>
-
-          </div>
-
-          <div className="payment-row">
-
-            <span>
-              Weight
-            </span>
-
-            <strong>
-              {shipment.parcel?.weight ||
-                0} kg
-            </strong>
-
-          </div>
-
-        </section>
-
-
-        {/* DELIVERY */}
-
-        <section className="payment-card">
-
-          <h3>
-            Delivery Information
-          </h3>
-
-          <div className="payment-row">
-
-            <span>
-              Estimated Delivery
-            </span>
-
-            <strong>
-              2 - 4 Business Days
-            </strong>
-
-          </div>
-
-          <div className="payment-row">
-
-            <span>
-              Delivery Fee
-            </span>
-
-            <strong>
-              {deliveryFee.toLocaleString()} FCFA
-            </strong>
-
-          </div>
-
-        </section>
-
-
-        {/* PAYMENT METHOD */}
-
-        <section className="payment-card">
-
-          <h3>
-            Choose Payment Method
-          </h3>
-
-          <label
-            className={`payment-method ${
-              paymentMethod === "momo"
-                ? "selected"
-                : ""
-            }`}
-          >
-
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="momo"
-              checked={
+            <button
+              type="button"
+              className={
                 paymentMethod === "momo"
+                  ? "payment-method active"
+                  : "payment-method"
               }
-              onChange={(event) =>
-                setPaymentMethod(
-                  event.target.value
-                )
+              onClick={() =>
+                setPaymentMethod("momo")
               }
-              disabled={loading}
-            />
+            >
+              📱 Mobile Money
+            </button>
 
-            <span className="method-icon">
-              📱
-            </span>
-
-            <span className="method-info">
-
-              <strong>
-                Mobile Money
-              </strong>
-
-              <small>
-                MTN MoMo / Orange Money
-              </small>
-
-            </span>
-
-          </label>
-
-
-          <label
-            className={`payment-method ${
-              paymentMethod === "card"
-                ? "selected"
-                : ""
-            }`}
-          >
-
-            <input
-              type="radio"
-              name="paymentMethod"
-              value="card"
-              checked={
-                paymentMethod === "card"
+            <button
+              type="button"
+              className={
+                paymentMethod === "cash"
+                  ? "payment-method active"
+                  : "payment-method"
               }
-              onChange={(event) =>
-                setPaymentMethod(
-                  event.target.value
-                )
+              onClick={() =>
+                setPaymentMethod("cash")
               }
-              disabled={loading}
-            />
+            >
+              💵 Cash
+            </button>
 
-            <span className="method-icon">
-              💳
-            </span>
-
-            <span className="method-info">
-
-              <strong>
-                Bank Card
-              </strong>
-
-              <small>
-                Visa / Mastercard
-              </small>
-
-            </span>
-
-          </label>
-
-        </section>
-
-
-        {/* ERROR */}
-
-        {error && (
-          <div className="payment-error">
-            {error}
           </div>
-        )}
 
+          {error && (
+            <p className="payment-error">
+              {error}
+            </p>
+          )}
 
-        {/* TOTAL */}
+          <button
+            type="button"
+            className="pay-button"
+            onClick={handlePayment}
+            disabled={loading}
+          >
+            {loading
+              ? "Processing..."
+              : `Pay ${deliveryFee.toLocaleString()} FCFA`}
+          </button>
 
-        <section className="payment-total">
-
-          <span>
-            Total Amount
-          </span>
-
-          <strong>
-            {deliveryFee.toLocaleString()} FCFA
-          </strong>
-
-        </section>
-
-
-        {/* PAY */}
-
-        <button
-          type="button"
-          className="pay-button"
-          onClick={handlePayment}
-          disabled={loading}
-        >
-
-          {loading
-            ? "Processing Payment..."
-            : `Pay ${deliveryFee.toLocaleString()} FCFA`}
-
-        </button>
-
-
-        <p className="payment-security">
-          🔒 Your payment information is secure.
-        </p>
+        </div>
 
       </main>
 

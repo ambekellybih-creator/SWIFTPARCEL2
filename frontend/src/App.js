@@ -19,6 +19,12 @@ import PaymentScreen from "./pages/PaymentScreen";
 import Shipments from "./pages/Shipments";
 import AdminDashboard from "./pages/AdminDashboard";
 import TrackingDetails from "./pages/TrackingDetails";
+import EditReceiver from "./pages/EditReceiver";
+import EditShipment from "./pages/EditShipment";
+
+// ======================================================
+// TRACKING ROUTE TEST
+// ======================================================
 
 function TrackingTest() {
   const navigate = useNavigate();
@@ -49,6 +55,7 @@ function TrackingTest() {
       </p>
 
       <button
+        type="button"
         onClick={() => navigate("/home")}
         style={{
           background: "#3424e9",
@@ -66,30 +73,40 @@ function TrackingTest() {
   );
 }
 
+
+// ======================================================
+// APP
+// ======================================================
+
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        {/* ============================= */}
-        {/* SPLASH SCREEN                 */}
-        {/* ============================= */}
+        {/* ==================================================
+            START
+        ================================================== */}
+
         <Route
           path="/"
           element={<SplashScreen />}
         />
 
-        {/* ============================= */}
-        {/* ONBOARDING SCREEN             */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            ONBOARDING
+        ================================================== */}
+
         <Route
           path="/onboarding"
           element={<OnboardingScreen />}
         />
 
-        {/* ============================= */}
-        {/* AUTHENTICATION                 */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            AUTHENTICATION
+        ================================================== */}
+
         <Route
           path="/login"
           element={<LoginScreen />}
@@ -100,17 +117,21 @@ function App() {
           element={<SignUpScreen />}
         />
 
-        {/* ============================= */}
-        {/* HOME                           */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            HOME
+        ================================================== */}
+
         <Route
           path="/home"
           element={<HomeScreen />}
         />
 
-        {/* ============================= */}
-        {/* PARCEL CREATION                */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            SEND PARCEL
+        ================================================== */}
+
         <Route
           path="/send-parcel"
           element={<SendParcel />}
@@ -131,46 +152,76 @@ function App() {
           element={<ConfirmShipment />}
         />
 
-        {/* ============================= */}
-        {/* PAYMENT                        */}
-        {/* ============================= */}
         <Route
           path="/payment"
           element={<PaymentScreen />}
         />
 
-        {/* ============================= */}
-        {/* SHIPMENTS                      */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            SHIPMENTS
+        ================================================== */}
+
         <Route
           path="/shipments"
           element={<Shipments />}
         />
 
-        {/* ============================= */}
-        {/* TRACKING TEST                  */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            TRACKING TEST
+        ================================================== */}
+
         <Route
           path="/tracking-test"
           element={<TrackingTest />}
         />
 
-        {/* ============================= */}
-        {/* REAL TRACKING                  */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            REAL TRACKING
+            IMPORTANT:
+            trackingNumber comes from the URL.
+            
+            Example:
+            /tracking/SP123456789
+        ================================================== */}
+
         <Route
           path="/tracking/:trackingNumber"
           element={<TrackingDetails />}
         />
 
-        {/* ============================= */}
-        {/* ADMIN                          */}
-        {/* ============================= */}
+
+        {/* ==================================================
+            ADMIN
+        ================================================== */}
+
         <Route
           path="/admin"
           element={<AdminDashboard />}
         />
 
+
+        {/* ==================================================
+            FALLBACK
+            If someone opens an unknown URL, send them home.
+        ================================================== */}
+
+        <Route
+          path="*"
+          element={<HomeScreen />}
+        />
+
+<Route
+  path="/edit-receiver/:trackingNumber"
+  element={<EditReceiver />}
+/>
+
+<Route
+  path="/edit-shipment/:trackingNumber"
+  element={<EditShipment />}
+/>
       </Routes>
     </BrowserRouter>
   );

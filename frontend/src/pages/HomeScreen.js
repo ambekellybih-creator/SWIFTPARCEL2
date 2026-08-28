@@ -10,6 +10,27 @@ function HomeScreen() {
   const [trackingError, setTrackingError] = useState("");
   const [shipment, setShipment] = useState(null);
 
+  const apiUrl =
+    process.env.REACT_APP_API_URL ||
+    "https://swiftparcel-api-k6i6.onrender.com";
+
+  // ======================================================
+  // OPEN TRACKING PAGE
+  // ======================================================
+
+  const openTracking = (number) => {
+    const cleanNumber = String(number || "").trim();
+
+    if (!cleanNumber) {
+      setTrackingError("No tracking number was provided.");
+      return;
+    }
+
+    navigate(
+      `/tracking/${encodeURIComponent(cleanNumber)}`
+    );
+  };
+
   // ======================================================
   // TRACK SHIPMENT
   // ======================================================
@@ -27,10 +48,6 @@ function HomeScreen() {
     setShipment(null);
 
     try {
-      const apiUrl =
-        process.env.REACT_APP_API_URL ||
-        "https://swiftparcel-api-k6i6.onrender.com";
-
       const response = await fetch(
         `${apiUrl}/api/shipments/${encodeURIComponent(number)}`
       );
@@ -61,21 +78,14 @@ function HomeScreen() {
 
       setShipment(data.shipment);
 
-      // Automatically open tracking map
-      navigate(
-        `/tracking/${encodeURIComponent(
-          data.shipment.trackingNumber
-        )}`
-      );
-
+      // Automatically open tracking page
+      openTracking(data.shipment.trackingNumber);
     } catch (error) {
       console.error("Tracking error:", error);
 
       setTrackingError(
-        error.message ||
-          "Unable to track shipment."
+        error.message || "Unable to track shipment."
       );
-
     } finally {
       setTrackingLoading(false);
     }
@@ -94,24 +104,19 @@ function HomeScreen() {
       "Delivered",
     ];
 
-    const currentIndex =
-      statuses.indexOf(status);
+    const currentIndex = statuses.indexOf(status);
 
     return statuses.map((item, index) => ({
       name: item,
-      completed:
-        currentIndex >= index,
-      current:
-        currentIndex === index,
+      completed: currentIndex >= index,
+      current: currentIndex === index,
     }));
   };
 
   return (
     <div className="home-screen">
 
-      {/* ==================================================
-          HEADER
-      ================================================== */}
+      {/* HEADER */}
 
       <header className="home-header">
 
@@ -129,11 +134,11 @@ function HomeScreen() {
           className="notification-button"
           type="button"
           aria-label="Notifications"
-          onClick={() => {
+          onClick={() =>
             alert(
               "Notifications will be available soon."
-            );
-          }}
+            )
+          }
         >
           🔔
         </button>
@@ -141,9 +146,7 @@ function HomeScreen() {
       </header>
 
 
-      {/* ==================================================
-          TRACKING CARD
-      ================================================== */}
+      {/* TRACKING CARD */}
 
       <section className="tracking-card">
 
@@ -164,9 +167,7 @@ function HomeScreen() {
               placeholder="Enter tracking number"
               value={trackingNumber}
               onChange={(event) => {
-                setTrackingNumber(
-                  event.target.value
-                );
+                setTrackingNumber(event.target.value);
 
                 if (trackingError) {
                   setTrackingError("");
@@ -202,14 +203,22 @@ function HomeScreen() {
       </section>
 
 
-      {/* ==================================================
-          TRACKING RESULT
-      ================================================== */}
+      {/* TRACKING RESULT */}
 
       {shipment && (
         <section className="home-section">
 
-          <div className="tracking-result">
+          <div
+            className="tracking-result"
+            onClick={() =>
+              openTracking(
+                shipment.trackingNumber
+              )
+            }
+            style={{
+              cursor: "pointer",
+            }}
+          >
 
             <h2>
               Shipment Found 🎉
@@ -261,10 +270,6 @@ function HomeScreen() {
 
             </div>
 
-
-            {/* ==================================================
-                TIMELINE
-            ================================================== */}
 
             <div className="tracking-timeline">
 
@@ -319,15 +324,40 @@ function HomeScreen() {
 
             </div>
 
+            {/* TRACK BUTTON */}
+
+            <button
+              type="button"
+              onClick={(event) => {
+                event.stopPropagation();
+
+                openTracking(
+                  shipment.trackingNumber
+                );
+              }}
+              style={{
+                width: "100%",
+                marginTop: "20px",
+                padding: "14px",
+                border: "none",
+                borderRadius: "12px",
+                background: "#3424e9",
+                color: "white",
+                fontSize: "15px",
+                fontWeight: "bold",
+                cursor: "pointer",
+              }}
+            >
+              🗺️ View Shipment on Map
+            </button>
+
           </div>
 
         </section>
       )}
 
 
-      {/* ==================================================
-          QUICK ACTIONS
-      ================================================== */}
+      {/* QUICK ACTIONS */}
 
       <section className="home-section">
 
@@ -339,10 +369,7 @@ function HomeScreen() {
 
         </div>
 
-
         <div className="quick-actions">
-
-          {/* Send Parcel */}
 
           <button
             className="action-card"
@@ -370,8 +397,6 @@ function HomeScreen() {
 
           </button>
 
-
-          {/* Track Parcel */}
 
           <button
             className="action-card"
@@ -408,9 +433,7 @@ function HomeScreen() {
       </section>
 
 
-      {/* ==================================================
-          RECENT SHIPMENTS
-      ================================================== */}
+      {/* RECENT SHIPMENTS */}
 
       <section className="home-section">
 
@@ -430,7 +453,6 @@ function HomeScreen() {
           </button>
 
         </div>
-
 
         <div className="empty-shipments">
 
@@ -460,13 +482,11 @@ function HomeScreen() {
       </section>
 
 
-      {/* ==================================================
-          BOTTOM NAVIGATION
-      ================================================== */}
+      {/* BOTTOM NAVIGATION */}
 
       <nav className="bottom-navigation">
 
-        {/* Home */}
+        {/* HOME */}
 
         <button
           className="bottom-nav-item active"
@@ -487,7 +507,7 @@ function HomeScreen() {
         </button>
 
 
-        {/* Shipments */}
+        {/* SHIPMENTS */}
 
         <button
           className="bottom-nav-item"
@@ -508,7 +528,7 @@ function HomeScreen() {
         </button>
 
 
-        {/* Track */}
+        {/* TRACK */}
 
         <button
           className="bottom-nav-item"
@@ -533,16 +553,16 @@ function HomeScreen() {
         </button>
 
 
-        {/* Profile */}
+        {/* PROFILE */}
 
         <button
           className="bottom-nav-item"
           type="button"
-          onClick={() => {
+          onClick={() =>
             alert(
               "Profile page will be built soon."
-            );
-          }}
+            )
+          }
         >
 
           <span>
