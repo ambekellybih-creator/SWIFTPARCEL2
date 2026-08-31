@@ -1,0 +1,568 @@
+/* =========================================================
+   SWIFTPARCEL RATE CALCULATOR
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+.rate-page {
+  width: 100%;
+  min-height: 100vh;
+
+  background: #f8f8ff;
+
+  color: #10101a;
+
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    Arial,
+    sans-serif;
+
+  padding: 24px 20px 30px;
+
+  overflow-x: hidden;
+}
+
+
+/* =========================================================
+   HEADER
+   ========================================================= */
+
+.rate-header {
+  width: 100%;
+
+  height: 45px;
+
+  display: grid;
+
+  grid-template-columns: 45px 1fr 45px;
+
+  align-items: center;
+
+  margin-bottom: 28px;
+}
+
+.rate-header h1 {
+  margin: 0;
+
+  text-align: center;
+
+  font-size: 14px;
+
+  font-weight: 800;
+
+  color: #14141f;
+
+  letter-spacing: -0.2px;
+}
+
+.back-button {
+  width: 40px;
+  height: 40px;
+
+  padding: 0;
+
+  border: none;
+
+  background: transparent;
+
+  color: #151522;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: flex-start;
+
+  cursor: pointer;
+}
+
+.header-spacer {
+  width: 40px;
+  height: 40px;
+}
+
+
+/* =========================================================
+   CONTENT
+   ========================================================= */
+
+.rate-content {
+  width: 100%;
+}
+
+
+/* =========================================================
+   FORM FIELD
+   ========================================================= */
+
+.rate-field {
+  width: 100%;
+
+  margin-bottom: 19px;
+}
+
+.rate-field label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  color: #1b1b27;
+
+  font-size: 10px;
+
+  font-weight: 700;
+}
+
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+
+.input-wrapper {
+  width: 100%;
+
+  height: 45px;
+
+  background: #ffffff;
+
+  border: 1px solid #dedeea;
+
+  border-radius: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 0 13px;
+
+  color: #77778c;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.input-wrapper:focus-within {
+  border-color: #4a42f2;
+
+  box-shadow:
+    0 0 0 3px rgba(65, 58, 240, 0.07);
+}
+
+.input-wrapper svg {
+  flex-shrink: 0;
+
+  color: #707085;
+}
+
+.input-wrapper input {
+  width: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  padding: 0 0 0 9px;
+
+  color: #282837;
+
+  font-size: 11px;
+
+  font-weight: 500;
+
+  font-family: inherit;
+}
+
+.input-wrapper input::placeholder {
+  color: #a0a0b0;
+}
+
+
+/* =========================================================
+   WEIGHT
+   ========================================================= */
+
+.weight-row {
+  width: 100%;
+
+  display: grid;
+
+  grid-template-columns: 1fr 100px;
+
+  gap: 10px;
+}
+
+.weight-input {
+  height: 45px;
+
+  background: white;
+
+  border: 1px solid #dedeea;
+
+  border-radius: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 0 13px;
+}
+
+.weight-input:focus-within {
+  border-color: #4a42f2;
+
+  box-shadow:
+    0 0 0 3px rgba(65, 58, 240, 0.07);
+}
+
+.weight-input input {
+  width: 100%;
+
+  height: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  font-family: inherit;
+
+  color: #282837;
+
+  font-size: 12px;
+
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   UNIT SELECT
+   ========================================================= */
+
+.unit-select {
+  height: 45px;
+
+  position: relative;
+
+  background: white;
+
+  border: 1px solid #dedeea;
+
+  border-radius: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 0 11px;
+}
+
+.unit-select select {
+  width: 100%;
+
+  height: 100%;
+
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #343444;
+
+  font-family: inherit;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.unit-select svg {
+  position: absolute;
+
+  right: 9px;
+
+  pointer-events: none;
+
+  color: #555568;
+}
+
+
+/* =========================================================
+   PARCEL SELECT
+   ========================================================= */
+
+.parcel-select {
+  width: 100%;
+
+  height: 45px;
+
+  background: white;
+
+  border: 1px solid #dedeea;
+
+  border-radius: 10px;
+
+  display: flex;
+
+  align-items: center;
+
+  padding: 0 12px;
+
+  position: relative;
+}
+
+.parcel-select:focus-within {
+  border-color: #4a42f2;
+
+  box-shadow:
+    0 0 0 3px rgba(65, 58, 240, 0.07);
+}
+
+.parcel-select-icon {
+  color: #68687c;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  margin-right: 7px;
+}
+
+.parcel-select select {
+  appearance: none;
+
+  -webkit-appearance: none;
+
+  width: 100%;
+
+  height: 100%;
+
+  border: none;
+
+  outline: none;
+
+  background: transparent;
+
+  color: #30303e;
+
+  font-family: inherit;
+
+  font-size: 11px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.parcel-select > svg {
+  position: absolute;
+
+  right: 11px;
+
+  color: #555568;
+
+  pointer-events: none;
+}
+
+
+/* =========================================================
+   PRICE CARD
+   ========================================================= */
+
+.price-card {
+  width: 100%;
+
+  min-height: 145px;
+
+  margin-top: 8px;
+
+  margin-bottom: 20px;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      145deg,
+      #f0f0ff,
+      #e9e9fa
+    );
+
+  border: 1px solid #e2e2f0;
+
+  display: flex;
+
+  flex-direction: column;
+
+  align-items: center;
+
+  justify-content: center;
+
+  text-align: center;
+
+  padding: 18px;
+}
+
+.price-label {
+  margin: 0 0 10px;
+
+  color: #777790;
+
+  font-size: 10px;
+
+  font-weight: 700;
+}
+
+.price-card h2 {
+  margin: 0;
+
+  color: #171722;
+
+  font-size: 22px;
+
+  line-height: 1;
+
+  font-weight: 850;
+
+  letter-spacing: -0.5px;
+}
+
+.price-card h2 span {
+  font-size: 12px;
+
+  font-weight: 700;
+
+  letter-spacing: 0;
+}
+
+.delivery-info {
+  display: flex;
+
+  align-items: center;
+
+  gap: 5px;
+
+  margin-top: 12px;
+
+  color: #5353e5;
+
+  font-size: 10px;
+
+  font-weight: 700;
+}
+
+.delivery-dot {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #32b67a;
+}
+
+
+/* =========================================================
+   GET STARTED BUTTON
+   ========================================================= */
+
+.get-started-button {
+  width: 100%;
+
+  height: 49px;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #4036f3,
+      #3026e4
+    );
+
+  color: white;
+
+  font-family: inherit;
+
+  font-size: 11px;
+
+  font-weight: 750;
+
+  cursor: pointer;
+
+  box-shadow:
+    0 7px 16px rgba(54, 45, 229, 0.18);
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.get-started-button:hover {
+  box-shadow:
+    0 9px 20px rgba(54, 45, 229, 0.25);
+}
+
+.get-started-button:active {
+  transform: scale(0.98);
+}
+
+
+/* =========================================================
+   DESKTOP
+   ========================================================= */
+
+@media (min-width: 600px) {
+
+  .rate-page {
+    max-width: 430px;
+
+    margin: 0 auto;
+
+    padding-left: 24px;
+    padding-right: 24px;
+  }
+}
+
+
+/* =========================================================
+   SMALL PHONES
+   ========================================================= */
+
+@media (max-width: 360px) {
+
+  .rate-page {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .rate-header {
+    margin-bottom: 23px;
+  }
+
+  .weight-row {
+    grid-template-columns: 1fr 90px;
+  }
+
+  .price-card {
+    min-height: 135px;
+  }
+}

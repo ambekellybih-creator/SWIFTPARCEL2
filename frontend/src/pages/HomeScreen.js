@@ -1,581 +1,671 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./HomeScreen.css";
+
+
+// ======================================================
+// ICONS
+// ======================================================
+
+const Icon = ({ name, size = 24, stroke = 2 }) => {
+  const common = {
+    width: size,
+    height: size,
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: stroke,
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+  };
+
+  switch (name) {
+    case "search":
+      return (
+        <svg {...common}>
+          <circle cx="11" cy="11" r="7" />
+          <path d="m20 20-4-4" />
+        </svg>
+      );
+
+    case "scan":
+      return (
+        <svg {...common}>
+          <path d="M4 8V5a1 1 0 0 1 1-1h3" />
+          <path d="M16 4h3a1 1 0 0 1 1 1v3" />
+          <path d="M20 16v3a1 1 0 0 1-1 1h-3" />
+          <path d="M8 20H5a1 1 0 0 1-1-1v-3" />
+          <path d="M7 12h10" />
+          <path d="M12 7v10" />
+        </svg>
+      );
+
+    case "box":
+      return (
+        <svg {...common}>
+          <path d="m21 8-9-5-9 5 9 5 9-5Z" />
+          <path d="M3 8v8l9 5 9-5V8" />
+          <path d="M12 13v8" />
+          <path d="m7.5 5.5 9 5" />
+        </svg>
+      );
+
+    case "track":
+      return (
+        <svg {...common}>
+          <circle cx="10.5" cy="10.5" r="6.5" />
+          <path d="m16 16 5 5" />
+          <path d="M8 10.5h5" />
+          <path d="M10.5 8v5" />
+        </svg>
+      );
+
+    case "calculator":
+      return (
+        <svg {...common}>
+          <rect x="5" y="3" width="14" height="18" rx="2" />
+          <rect x="8" y="6" width="8" height="3" rx="1" />
+          <path d="M8 13h2" />
+          <path d="M14 13h2" />
+          <path d="M8 17h2" />
+          <path d="M14 17h2" />
+        </svg>
+      );
+
+    case "location":
+      return (
+        <svg {...common}>
+          <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z" />
+          <circle cx="12" cy="10" r="2.5" />
+        </svg>
+      );
+
+    case "bell":
+      return (
+        <svg {...common}>
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9" />
+          <path d="M10 21h4" />
+        </svg>
+      );
+
+    case "home":
+      return (
+        <svg {...common}>
+          <path d="m3 10 9-7 9 7" />
+          <path d="M5 9v11h14V9" />
+          <path d="M9 20v-6h6v6" />
+        </svg>
+      );
+
+    case "shipments":
+      return (
+        <svg {...common}>
+          <rect x="5" y="4" width="14" height="16" rx="2" />
+          <path d="M9 8h6" />
+          <path d="M9 12h6" />
+          <path d="M9 16h3" />
+        </svg>
+      );
+
+    case "plus":
+      return (
+        <svg {...common}>
+          <path d="M12 5v14" />
+          <path d="M5 12h14" />
+        </svg>
+      );
+
+    case "profile":
+      return (
+        <svg {...common}>
+          <circle cx="12" cy="8" r="4" />
+          <path d="M4 21c.8-4 3.5-6 8-6s7.2 2 8 6" />
+        </svg>
+      );
+
+    case "arrow":
+      return (
+        <svg {...common}>
+          <path d="M5 12h14" />
+          <path d="m13 6 6 6-6 6" />
+        </svg>
+      );
+
+    default:
+      return null;
+  }
+};
+
+
+// ======================================================
+// PACKAGE ILLUSTRATION
+// ======================================================
+
+const PackageIllustration = () => {
+  return (
+    <div className="promo-package">
+
+      <div className="package-top">
+        <span />
+      </div>
+
+      <div className="package-front">
+        <div className="package-tape" />
+      </div>
+
+      <div className="package-side" />
+
+      <div className="package-label">
+        SWIFT
+      </div>
+
+    </div>
+  );
+};
+
+
+// ======================================================
+// HOME SCREEN
+// ======================================================
 
 function HomeScreen() {
   const navigate = useNavigate();
 
+  const [userName, setUserName] = useState("Kelly");
   const [trackingNumber, setTrackingNumber] = useState("");
-  const [trackingLoading, setTrackingLoading] = useState(false);
-  const [trackingError, setTrackingError] = useState("");
-  const [shipment, setShipment] = useState(null);
+  const [recentShipment, setRecentShipment] = useState({
+    trackingNumber: "SPC7236491",
+    status: "On the way",
+    from: "Buea",
+    to: "Yaoundé",
+    date: "Aug 7, 2036",
+  });
 
-  const apiUrl =
-    process.env.REACT_APP_API_URL ||
-    "https://swiftparcel-api-k6i6.onrender.com";
 
   // ======================================================
-  // OPEN TRACKING PAGE
+  // LOAD USER
   // ======================================================
 
-  const openTracking = (number) => {
-    const cleanNumber = String(number || "").trim();
+  useEffect(() => {
+    try {
+      const storedUser =
+        localStorage.getItem("swiftparcelUser") ||
+        localStorage.getItem("user");
 
-    if (!cleanNumber) {
-      setTrackingError("No tracking number was provided.");
-      return;
+      if (storedUser) {
+        const parsedUser = JSON.parse(storedUser);
+
+        if (parsedUser.fullName) {
+          setUserName(parsedUser.fullName.split(" ")[0]);
+        } else if (parsedUser.name) {
+          setUserName(parsedUser.name.split(" ")[0]);
+        }
+      }
+    } catch (error) {
+      console.log("Could not load user");
     }
+  }, []);
 
-    navigate(
-      `/tracking/${encodeURIComponent(cleanNumber)}`
-    );
-  };
+
+  // ======================================================
+  // LOAD RECENT SHIPMENT
+  // ======================================================
+
+  useEffect(() => {
+    try {
+      const storedShipments =
+        localStorage.getItem("swiftparcelShipments");
+
+      if (storedShipments) {
+        const shipments = JSON.parse(storedShipments);
+
+        if (Array.isArray(shipments) && shipments.length > 0) {
+          const shipment = shipments[0];
+
+          setRecentShipment({
+            trackingNumber:
+              shipment.trackingNumber || "SPC7236491",
+
+            status:
+              shipment.status === "delivered"
+                ? "Delivered"
+                : "On the way",
+
+            from:
+              shipment.pickupAddress ||
+              shipment.from ||
+              "Buea",
+
+            to:
+              shipment.deliveryAddress ||
+              shipment.to ||
+              "Yaoundé",
+
+            date:
+              shipment.date ||
+              shipment.createdAt ||
+              "Aug 7, 2036",
+          });
+        }
+      }
+    } catch (error) {
+      console.log("Could not load shipments");
+    }
+  }, []);
+
 
   // ======================================================
   // TRACK SHIPMENT
   // ======================================================
 
-  const handleTrack = async () => {
-    const number = trackingNumber.trim();
+  const handleTrack = () => {
+    const number =
+      trackingNumber.trim() ||
+      recentShipment.trackingNumber;
 
-    if (!number) {
-      setTrackingError("Please enter a tracking number.");
-      return;
-    }
+    if (!number) return;
 
-    setTrackingLoading(true);
-    setTrackingError("");
-    setShipment(null);
-
-    try {
-      const response = await fetch(
-        `${apiUrl}/api/shipments/${encodeURIComponent(number)}`
-      );
-
-      const responseText = await response.text();
-
-      let data = {};
-
-      try {
-        data = JSON.parse(responseText);
-      } catch {
-        throw new Error(
-          "The server returned an invalid response."
-        );
-      }
-
-      if (!response.ok) {
-        throw new Error(
-          data.message || "Shipment not found."
-        );
-      }
-
-      if (!data.shipment) {
-        throw new Error(
-          "Shipment information was not found."
-        );
-      }
-
-      setShipment(data.shipment);
-
-      // Automatically open tracking page
-      openTracking(data.shipment.trackingNumber);
-    } catch (error) {
-      console.error("Tracking error:", error);
-
-      setTrackingError(
-        error.message || "Unable to track shipment."
-      );
-    } finally {
-      setTrackingLoading(false);
-    }
+    navigate(
+      `/tracking-details?trackingNumber=${encodeURIComponent(number)}`
+    );
   };
 
+
   // ======================================================
-  // TRACKING TIMELINE
+  // QUICK ACTIONS
   // ======================================================
 
-  const getStatusStep = (status) => {
-    const statuses = [
-      "Pending",
-      "Picked Up",
-      "In Transit",
-      "Out for Delivery",
-      "Delivered",
-    ];
-
-    const currentIndex = statuses.indexOf(status);
-
-    return statuses.map((item, index) => ({
-      name: item,
-      completed: currentIndex >= index,
-      current: currentIndex === index,
-    }));
+  const sendParcel = () => {
+    navigate("/send-parcel");
   };
+
+  const trackParcel = () => {
+    navigate("/track-parcel");
+  };
+
+  const rateCalculator = () => {
+    navigate("/rate-calculator");
+  };
+
+  const findLocation = () => {
+    navigate("/find-location");
+  };
+
+
+  // ======================================================
+  // NAVIGATION
+  // ======================================================
+
+  const goHome = () => {
+    navigate("/home");
+  };
+
+  const goShipments = () => {
+    navigate("/shipments");
+  };
+
+  const goNotifications = () => {
+    navigate("/notifications");
+  };
+
+  const goProfile = () => {
+    navigate("/profile");
+  };
+
+  const openSendParcel = () => {
+    navigate("/send-parcel");
+  };
+
 
   return (
-    <div className="home-screen">
+    <div className="home-page">
 
-      {/* HEADER */}
+      {/* ==================================================
+          TOP HEADER
+      ================================================== */}
 
       <header className="home-header">
 
-        <div>
-          <p className="home-greeting">
-            Good day 👋
-          </p>
+        <div className="greeting">
 
           <h1>
-            Welcome to SwiftParcel
+            Hello, {userName} <span className="wave">👋</span>
           </h1>
+
+          <p>
+            Where would you like to send today?
+          </p>
+
         </div>
 
         <button
           className="notification-button"
-          type="button"
-          aria-label="Notifications"
-          onClick={() =>
-            alert(
-              "Notifications will be available soon."
-            )
-          }
+          onClick={goNotifications}
         >
-          🔔
+          <Icon name="bell" size={22} />
+
+          <span className="notification-dot" />
         </button>
 
       </header>
 
 
-      {/* TRACKING CARD */}
+      {/* ==================================================
+          SEARCH / TRACK BAR
+      ================================================== */}
 
-      <section className="tracking-card">
+      <div className="tracking-search">
 
-        <div className="tracking-card-content">
+        <Icon
+          name="search"
+          size={20}
+          stroke={2}
+        />
 
-          <p>
-            Track your parcel
-          </p>
-
-          <h2>
-            Where is your parcel?
-          </h2>
-
-          <div className="tracking-input">
-
-            <input
-              type="text"
-              placeholder="Enter tracking number"
-              value={trackingNumber}
-              onChange={(event) => {
-                setTrackingNumber(event.target.value);
-
-                if (trackingError) {
-                  setTrackingError("");
-                }
-              }}
-              onKeyDown={(event) => {
-                if (event.key === "Enter") {
-                  handleTrack();
-                }
-              }}
-            />
-
-            <button
-              type="button"
-              onClick={handleTrack}
-              disabled={trackingLoading}
-            >
-              {trackingLoading
-                ? "Tracking..."
-                : "Track"}
-            </button>
-
-          </div>
-
-          {trackingError && (
-            <p className="tracking-error">
-              {trackingError}
-            </p>
-          )}
-
-        </div>
-
-      </section>
-
-
-      {/* TRACKING RESULT */}
-
-      {shipment && (
-        <section className="home-section">
-
-          <div
-            className="tracking-result"
-            onClick={() =>
-              openTracking(
-                shipment.trackingNumber
-              )
+        <input
+          type="text"
+          value={trackingNumber}
+          onChange={(e) =>
+            setTrackingNumber(e.target.value)
+          }
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              handleTrack();
             }
-            style={{
-              cursor: "pointer",
-            }}
-          >
-
-            <h2>
-              Shipment Found 🎉
-            </h2>
-
-            <div className="tracking-result-details">
-
-              <p>
-                <strong>
-                  Tracking Number:
-                </strong>{" "}
-                {shipment.trackingNumber}
-              </p>
-
-              <p>
-                <strong>
-                  Current Status:
-                </strong>{" "}
-                {shipment.status}
-              </p>
-
-              <p>
-                <strong>
-                  Sender:
-                </strong>{" "}
-                {shipment.senderName}
-              </p>
-
-              <p>
-                <strong>
-                  Receiver:
-                </strong>{" "}
-                {shipment.receiverName}
-              </p>
-
-              <p>
-                <strong>
-                  Parcel Type:
-                </strong>{" "}
-                {shipment.parcelType}
-              </p>
-
-              <p>
-                <strong>
-                  Weight:
-                </strong>{" "}
-                {shipment.weight} kg
-              </p>
-
-            </div>
-
-
-            <div className="tracking-timeline">
-
-              <h3>
-                Shipment Progress
-              </h3>
-
-              {getStatusStep(
-                shipment.status
-              ).map((step, index) => (
-
-                <div
-                  className={`timeline-step ${
-                    step.completed
-                      ? "completed"
-                      : ""
-                  } ${
-                    step.current
-                      ? "current"
-                      : ""
-                  }`}
-                  key={step.name}
-                >
-
-                  <div className="timeline-icon">
-
-                    {step.completed
-                      ? "✓"
-                      : index + 1}
-
-                  </div>
-
-                  <div className="timeline-content">
-
-                    <strong>
-                      {step.name}
-                    </strong>
-
-                    <p>
-                      {step.current
-                        ? "Your shipment is currently at this stage."
-                        : step.completed
-                        ? "Completed"
-                        : "Not yet reached"}
-                    </p>
-
-                  </div>
-
-                </div>
-
-              ))}
-
-            </div>
-
-            {/* TRACK BUTTON */}
-
-            <button
-              type="button"
-              onClick={(event) => {
-                event.stopPropagation();
-
-                openTracking(
-                  shipment.trackingNumber
-                );
-              }}
-              style={{
-                width: "100%",
-                marginTop: "20px",
-                padding: "14px",
-                border: "none",
-                borderRadius: "12px",
-                background: "#3424e9",
-                color: "white",
-                fontSize: "15px",
-                fontWeight: "bold",
-                cursor: "pointer",
-              }}
-            >
-              🗺️ View Shipment on Map
-            </button>
-
-          </div>
-
-        </section>
-      )}
-
-
-      {/* QUICK ACTIONS */}
-
-      <section className="home-section">
-
-        <div className="section-heading">
-
-          <h2>
-            Quick Actions
-          </h2>
-
-        </div>
-
-        <div className="quick-actions">
-
-          <button
-            className="action-card"
-            type="button"
-            onClick={() =>
-              navigate("/send-parcel")
-            }
-          >
-
-            <div className="action-icon">
-              📦
-            </div>
-
-            <div>
-
-              <h3>
-                Send Parcel
-              </h3>
-
-              <p>
-                Send a package
-              </p>
-
-            </div>
-
-          </button>
-
-
-          <button
-            className="action-card"
-            type="button"
-            onClick={() => {
-              document
-                .querySelector(
-                  ".tracking-input input"
-                )
-                ?.focus();
-            }}
-          >
-
-            <div className="action-icon">
-              🚚
-            </div>
-
-            <div>
-
-              <h3>
-                Track Parcel
-              </h3>
-
-              <p>
-                Track your delivery
-              </p>
-
-            </div>
-
-          </button>
-
-        </div>
-
-      </section>
-
-
-      {/* RECENT SHIPMENTS */}
-
-      <section className="home-section">
-
-        <div className="section-heading">
-
-          <h2>
-            Recent Shipments
-          </h2>
-
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/shipments")
-            }
-          >
-            View all
-          </button>
-
-        </div>
-
-        <div className="empty-shipments">
-
-          <div className="empty-icon">
-            📦
-          </div>
-
-          <h3>
-            No shipments yet
-          </h3>
-
-          <p>
-            Your recent shipments will appear here.
-          </p>
-
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/send-parcel")
-            }
-          >
-            Send your first parcel
-          </button>
-
-        </div>
-
-      </section>
-
-
-      {/* BOTTOM NAVIGATION */}
-
-      <nav className="bottom-navigation">
-
-        {/* HOME */}
+          }}
+          placeholder="Track a parcel..."
+        />
+
+        <div className="search-divider" />
 
         <button
-          className="bottom-nav-item active"
-          type="button"
-          onClick={() =>
-            navigate("/home")
-          }
+          className="scan-button"
+          onClick={handleTrack}
         >
-
-          <span>
-            ⌂
-          </span>
-
-          <small>
-            Home
-          </small>
-
+          <Icon name="scan" size={20} />
         </button>
 
+      </div>
 
-        {/* SHIPMENTS */}
 
+      {/* ==================================================
+          PROMOTIONAL BANNER
+      ================================================== */}
+
+      <section
+        className="promo-banner"
+        onClick={sendParcel}
+      >
+
+        <div className="promo-text">
+
+          <h2>
+            Send parcels
+            <br />
+            across the country
+          </h2>
+
+          <p>
+            Quick. Reliable & Affordable
+          </p>
+
+        </div>
+
+        <PackageIllustration />
+
+      </section>
+
+
+      {/* ==================================================
+          QUICK ACTIONS
+      ================================================== */}
+
+      <section className="quick-actions">
+
+        {/* SEND */}
         <button
-          className="bottom-nav-item"
-          type="button"
-          onClick={() =>
-            navigate("/shipments")
-          }
+          className="quick-action"
+          onClick={sendParcel}
         >
+          <div className="action-icon blue-icon">
+            <Icon name="box" size={28} />
+          </div>
 
           <span>
-            ▣
+            Send Parcel
           </span>
-
-          <small>
-            Shipments
-          </small>
-
         </button>
 
 
         {/* TRACK */}
-
         <button
-          className="bottom-nav-item"
-          type="button"
-          onClick={() => {
-            document
-              .querySelector(
-                ".tracking-input input"
-              )
-              ?.focus();
-          }}
+          className="quick-action"
+          onClick={trackParcel}
         >
+          <div className="action-icon blue-icon">
+            <Icon name="track" size={28} />
+          </div>
 
           <span>
-            ⌖
+            Track Parcel
           </span>
-
-          <small>
-            Track
-          </small>
-
         </button>
 
 
-        {/* PROFILE */}
-
+        {/* RATE */}
         <button
-          className="bottom-nav-item"
-          type="button"
-          onClick={() =>
-            alert(
-              "Profile page will be built soon."
-            )
-          }
+          className="quick-action"
+          onClick={rateCalculator}
         >
+          <div className="action-icon blue-icon">
+            <Icon name="calculator" size={28} />
+          </div>
 
           <span>
-            ◯
+            Rate Calculator
           </span>
-
-          <small>
-            Profile
-          </small>
-
         </button>
 
-      </nav>
+
+        {/* LOCATION */}
+        <button
+          className="quick-action"
+          onClick={findLocation}
+        >
+          <div className="action-icon blue-icon">
+            <Icon name="location" size={28} />
+          </div>
+
+          <span>
+            Find Location
+          </span>
+        </button>
+
+      </section>
+
+
+      {/* ==================================================
+          RECENT SHIPMENTS HEADER
+      ================================================== */}
+
+      <div className="section-header">
+
+        <h2>
+          Recent Shipments
+        </h2>
+
+        <button
+          onClick={goShipments}
+        >
+          See all
+        </button>
+
+      </div>
+
+
+      {/* ==================================================
+          RECENT SHIPMENT CARD
+      ================================================== */}
+
+      <button
+        className="recent-shipment"
+        onClick={() =>
+          navigate(
+            `/tracking-details?trackingNumber=${encodeURIComponent(
+              recentShipment.trackingNumber
+            )}`
+          )
+        }
+      >
+
+        <div className="shipment-icon">
+          📦
+        </div>
+
+
+        <div className="shipment-information">
+
+          <strong>
+            {recentShipment.trackingNumber}
+          </strong>
+
+          <div className="shipment-status">
+
+            <span className="status-icon">
+              ✓
+            </span>
+
+            <span>
+              {recentShipment.status}
+            </span>
+
+          </div>
+
+          <div className="shipment-route">
+
+            <span className="route-icon">
+              ♟
+            </span>
+
+            <span>
+              {recentShipment.from}
+            </span>
+
+            <span className="route-arrow">
+              →
+            </span>
+
+            <span>
+              {recentShipment.to}
+            </span>
+
+          </div>
+
+        </div>
+
+
+        <div className="shipment-date">
+          Aug 7, 2036
+        </div>
+
+      </button>
+
+
+      {/* ==================================================
+          BOTTOM NAVIGATION
+      ================================================== */}
+{/* ==================================================
+    BOTTOM NAVIGATION
+================================================== */}
+
+<nav
+  className="bottom-navigation"
+  aria-label="Main navigation"
+>
+
+  {/* HOME */}
+  <button
+    type="button"
+    className="bottom-item active"
+    onClick={goHome}
+  >
+    <Icon
+      name="home"
+      size={21}
+    />
+
+    <span>
+      Home
+    </span>
+  </button>
+
+
+  {/* SHIPMENTS */}
+  <button
+    type="button"
+    className="bottom-item"
+    onClick={goShipments}
+  >
+    <Icon
+      name="shipments"
+      size={21}
+    />
+
+    <span>
+      Shipments
+    </span>
+  </button>
+
+
+  {/* CENTER PLUS */}
+  <button
+    type="button"
+    className="bottom-plus"
+    onClick={openSendParcel}
+    aria-label="Send Parcel"
+  >
+    <Icon
+      name="plus"
+      size={28}
+      stroke={2.5}
+    />
+  </button>
+
+
+  {/* NOTIFICATIONS */}
+  <button
+    type="button"
+    className="bottom-item"
+    onClick={goNotifications}
+  >
+    <Icon
+      name="bell"
+      size={21}
+    />
+
+    <span>
+      Notifications
+    </span>
+  </button>
+
+
+  {/* PROFILE */}
+  <button
+    type="button"
+    className="bottom-item"
+    onClick={goProfile}
+  >
+    <Icon
+      name="profile"
+      size={21}
+    />
+
+    <span>
+      Profile
+    </span>
+  </button>
+
+</nav>
 
     </div>
   );

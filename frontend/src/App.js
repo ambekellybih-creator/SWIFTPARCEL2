@@ -21,6 +21,14 @@ import AdminDashboard from "./pages/AdminDashboard";
 import TrackingDetails from "./pages/TrackingDetails";
 import EditReceiver from "./pages/EditReceiver";
 import EditShipment from "./pages/EditShipment";
+import RateCalculator from "./pages/RateCalculator";
+import Notifications from "./pages/Notifications";
+import Profile from "./pages/Profile";
+import EditProfile from "./pages/EditProfile";
+import ChangePassword from "./pages/ChangePassword";
+import HelpSupport from "./pages/HelpSupport";
+import About from "./pages/About";
+
 
 // ======================================================
 // TRACKING ROUTE TEST
@@ -222,7 +230,26 @@ function App() {
   path="/edit-shipment/:trackingNumber"
   element={<EditShipment />}
 />
-      </Routes>
+
+<Route
+  path="/rate-calculator"
+  element={<RateCalculator />}
+/>
+<Route
+  path="/notifications"
+  element={<Notifications />}
+/>
+
+<Route path="/profile" element={<Profile />} />
+      
+
+      <Route path="/profile" element={<Profile />} />
+<Route path="/edit-profile" element={<EditProfile />} />
+
+<Route path="/change-password" element={<ChangePassword />} />
+<Route path="/help-support" element={<HelpSupport />} />
+<Route path="/about" element={<About />} />
+</Routes>
     </BrowserRouter>
   );
 }

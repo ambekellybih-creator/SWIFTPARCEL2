@@ -16,9 +16,7 @@ function LoginScreen() {
   // BACKEND
   // ==========================================
 
-  const apiUrl =
-    "https://swiftparcel-api-k6i6.onrender.com";
-
+const apiUrl = "https://swiftparcel-api-k6i6.onrender.com";
   // ==========================================
   // LOGIN
   // ==========================================
